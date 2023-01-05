@@ -9,7 +9,7 @@ enum TokenType
     ELSE,
     FI,
     SC,
-    EOF,
+    EF,
     NL,
     SQ,
     AND,
