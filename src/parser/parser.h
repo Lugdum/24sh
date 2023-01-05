@@ -4,6 +4,7 @@
 #include "../lexer/lexer.h"
 
 enum NodeType {
+    AND_OR,
     LIST,
     PIPELINE,
     COMMAND,
