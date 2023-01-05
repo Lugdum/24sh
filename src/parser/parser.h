@@ -4,6 +4,7 @@
 #include "../lexer/lexer.h"
 
 enum NodeType {
+    AND_OR,
     LIST,
     PIPELINE,
     COMMAND,
@@ -17,11 +18,11 @@ struct Node {
 };
 
 struct Node *parse(struct Token *token);
-struct Node *parseList(struct Token *token);
-struct Node *parseAndOr(struct Token *token);
-struct Node *parsePipeline(struct Token *token);
-struct Node *parseCommand(struct Token *token);
-struct Node *parseSimpleCommand(struct Token *token);
+struct Node *parseList();
+struct Node *parseAndOr();
+struct Node *parsePipeline();
+struct Node *parseCommand();
+struct Node *parseSimpleCommand();
 void prettyprint(struct Node *node, int level);
 
 #endif /* !PARSER_H */

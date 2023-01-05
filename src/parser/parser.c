@@ -4,34 +4,37 @@
 #include <stdio.h>
 #include <string.h>
 
-struct Node *parse(struct Token *token)
+struct Token *token;
+
+struct Node *parse(struct Token *tok)
 {
+    token = tok;
     struct Node *res = NULL;
     // Traiter le cas où la liste est vide
     if (token == NULL)
         return res;
 
     // Traiter le cas où la liste se termine par EOF ou '\n'
-    if (token->type == EOF || token->type == NL)
+    if (token->type == EF || token->type == NL)
         return res;
 
     // Sinon, parser la liste
-    res = parseList(token);
+    res = parseList();
 
     // Si la liste se termine par '\n' ou EOF, renvoyer le résultat
-    if (token->type == EOF || token->type == NL)
+    if (token->type == EF || token->type == NL)
         return res;
 
     // Sinon, il y a une erreur de syntaxe
-    printf("Erreur de syntaxe : la liste ne se termine pas par EOF ou '\\n'\n");
+    //printf("Erreur de syntaxe : la liste ne se termine pas par EOF ou '\\n'\n");
     return NULL;
 }
 
-struct Node *parseList(struct Token *token)
+struct Node *parseList(void)
 {
     struct Node *res = NULL;
     // Parser le premier élément de la liste
-    res = parseAndOr(token);
+    res = parseAndOr();
 
     // Si la liste est vide, renvoyer le résultat
     if (token == NULL)
@@ -49,11 +52,11 @@ struct Node *parseList(struct Token *token)
     list->children[0] = res;
 
     int i = 1;
-    while (token != NULL && token->type == SC && token->type != EOF && token->type != NL)
+    while (token != NULL && token->type == SC && token->type != EF && token->type != NL)
     {
         // Consommer le ';' et parser le prochain élément
         token = token->next;
-        res = parseAndOr(token);
+        res = parseAndOr();
         list->children = realloc(list->children, (i+1) * sizeof(struct Node*));
         if (list->children == NULL)
             goto error;
@@ -70,11 +73,11 @@ error:
 }
 
 
-struct Node *parseAndOr(struct Token *token)
+struct Node *parseAndOr(void)
 {
     struct Node *res = NULL;
     // Parser le premier élément de l'AND_OR
-    res = parsePipeline(token);
+    res = parsePipeline();
 
     // Si l'AND_OR est vide, renvoyer le résultat
     if (token == NULL)
@@ -84,15 +87,26 @@ struct Node *parseAndOr(struct Token *token)
     while (token != NULL && (token->type == AND || token->type == OR))
     {
         // Consommer le token AND ou OR et parser le prochain élément
-        enum TokenType op = token->type;
+        char *v;
+        if (token->type == AND)
+        {
+            v = malloc(4 * sizeof(char));
+            v = "and";
+        }
+        else
+        {
+            v = malloc(3 * sizeof(char));
+            v = "or";
+        }
         token = token->next;
-        struct Node *right = parsePipeline(token);
+        struct Node *right = parsePipeline();
 
         // Créer un noeud AND_OR et affecter à ses enfants les noeuds gauche et droit
         struct Node *and_or = calloc(1, sizeof(struct Node));
         if (and_or == NULL)
             return NULL; // Erreur d'allocation de mémoire
-        and_or->type = op;
+        and_or->type = AND_OR;
+        and_or->value = v;
         and_or->children = calloc(2, sizeof(struct Node*));
         if (and_or->children == NULL)
         {
@@ -109,11 +123,11 @@ struct Node *parseAndOr(struct Token *token)
     return res;
 }
 
-struct Node *parsePipeline(struct Token *token)
+struct Node *parsePipeline(void)
 {
     struct Node *res = NULL;
     // Parser le premier élément de la PIPELINE
-    res = parseCommand(token);
+    res = parseCommand();
 
     // Si la PIPELINE est vide, renvoyer le résultat
     if (token == NULL)
@@ -124,7 +138,7 @@ struct Node *parsePipeline(struct Token *token)
     {
         // Consommer le token PIPE et parser le prochain élément
         token = token->next;
-        struct Node *right = parseCommand(token);
+        struct Node *right = parseCommand();
 
         // Créer un noeud PIPELINE et affecter à ses enfants les noeuds gauche et droit
         struct Node *pipeline = calloc(1, sizeof(struct Node));
@@ -147,7 +161,7 @@ struct Node *parsePipeline(struct Token *token)
     return res;
 }
 
-struct Node *parseCommand(struct Token *token)
+struct Node *parseCommand(void)
 {
     struct Node *res = NULL;
     // Si le premier token est un 'if', 'then', 'elif', 'else' ou 'fi', il s'agit d'une structure conditionnelle
@@ -157,7 +171,7 @@ struct Node *parseCommand(struct Token *token)
         res = calloc(1, sizeof(struct Node));
         if (res == NULL)
             return NULL; // Erreur d'allocation de mémoire
-        res->type = COMMAND;
+        res->type = token->type;
         res->children = calloc(5, sizeof(struct Node*));
         if (res->children == NULL)
         {
@@ -166,11 +180,15 @@ struct Node *parseCommand(struct Token *token)
         }
 
         // Affecter à chaque enfant le noeud correspondant à la structure conditionnelle
-        res->children[0] = parseSimpleCommand(token);
-        res->children[1] = parseList(token->next);
-        res->children[2] = parseSimpleCommand(token->next);
-        res->children[3] = parseList(token->next);
-        res->children[4] = parseSimpleCommand(token->next);
+        res->children[0] = parseSimpleCommand();
+        token = token->next;
+        res->children[1] = parseList();
+        token = token->next;
+        res->children[2] = parseSimpleCommand();
+        token = token->next;
+        res->children[3] = parseList();
+        token = token->next;
+        res->children[4] = parseSimpleCommand();
     }
     else // Sinon, il s'agit d'une commande simple
         res = parseSimpleCommand(token);
@@ -178,7 +196,7 @@ struct Node *parseCommand(struct Token *token)
     return res;
 }
 
-struct Node *parseSimpleCommand(struct Token *token)
+struct Node *parseSimpleCommand()
 {
     struct Node *res = NULL;
     // Si la commande est vide, renvoyer NULL
@@ -190,6 +208,7 @@ struct Node *parseSimpleCommand(struct Token *token)
     if (res == NULL)
         return NULL; // Erreur d'allocation de mémoire
     res->type = SIMPLE_COMMAND;
+    printf("We ended up here\n");
     res->children = calloc(1, sizeof(struct Node*));
     if (res->children == NULL)
     {
@@ -244,15 +263,49 @@ void prettyprint(struct Node *node, int level)
     // Si le noeud est NULL, il n'y a rien à afficher
     if (node == NULL)
     return;
-    // Afficher les enfants du noeud séparés par un espace
-    for (int i = 0; i < level; i++)
-        printf("  "); // Indentation
-    for (int i = 0; node->children[i] != NULL; i++)
+    if (level == 0)
     {
-        // Afficher la valeur du noeud s'il y en a une
-        if (node->children[i]->value != NULL)
-            printf("%s ", node->children[i]->value);
-        prettyprint(node->children[i], level+1);
+        printf("%i\n ", node->type);
+    }
+    // Afficher les enfants du noeud séparés par un espace
+    for (int i = 0; i <= level; i++)
+        printf("  "); // Indentation
+    if (node->children)
+    {
+        for (int i = 0; node->children[i] != NULL; i++)
+        {
+            // Afficher la valeur du noeud s'il y en a une
+            if (node->children[i]->value != NULL)
+                printf("%s ", node->children[i]->value);
+            else
+                printf("%i ", node->children[i]->type);
+            prettyprint(node->children[i], level+1);
+        }
     }
     printf("\n");
+}
+
+
+int findHeight(struct Node* root) {
+    if (root == NULL) {
+        return 0;
+    }
+    int maxHeight = 0;
+    int number = 0;
+    while (root->children[number] != NULL) 
+    {
+        number++;
+    }
+    for (int i = 0; i < number; i++) 
+    {
+        int height = findHeight(root->children[i]);
+        maxHeight = max(maxHeight, height);
+    }
+    return maxHeight + 1;
+}
+
+void sexyprint(struct Node *node)
+{
+    int max_height = findHeight(node);
+
 }
