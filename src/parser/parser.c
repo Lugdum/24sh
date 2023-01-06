@@ -26,7 +26,7 @@ struct Node *parse(struct Token *tok)
         return res;
 
     // Sinon, il y a une erreur de syntaxe
-    //printf("Erreur de syntaxe : la liste ne se termine pas par EOF ou '\\n'\n");
+    printf("Erreur de syntaxe : la liste ne se termine pas par EOF ou '\\n'\n");
     return NULL;
 }
 
@@ -91,12 +91,18 @@ struct Node *parseAndOr(void)
         if (token->type == AND)
         {
             v = malloc(4 * sizeof(char));
-            v = "and";
+            if (v == NULL) {
+                return NULL;
+            }
+            strcpy(v, "and");
         }
         else
         {
             v = malloc(3 * sizeof(char));
-            v = "or";
+            if (v == NULL) {
+                return NULL;
+            }
+            strcpy(v, "or");
         }
         token = token->next;
         struct Node *right = parsePipeline();
@@ -183,11 +189,11 @@ struct Node *parseCommand(void)
         res->children[0] = parseSimpleCommand();
         token = token->next;
         res->children[1] = parseList();
-        token = token->next;
+        //token = token->next;  // je pense que pas necessaire
         res->children[2] = parseSimpleCommand();
-        token = token->next;
+        //token = token->next;
         res->children[3] = parseList();
-        token = token->next;
+        //token = token->next;
         res->children[4] = parseSimpleCommand();
     }
     else // Sinon, il s'agit d'une commande simple
@@ -258,54 +264,33 @@ struct Node *parseSimpleCommand()
     return res;
 }
 
-void prettyprint(struct Node *node, int level)
+void sexyprint(struct Node *root, int level) 
 {
-    // Si le noeud est NULL, il n'y a rien à afficher
-    if (node == NULL)
-    return;
-    if (level == 0)
+    for (int i = 0; i < level; i++) {
+        printf("   |");
+    }
+    if (level == 0) 
     {
-        printf("%i\n ", node->type);
+        if (root->value != NULL)
+            printf("%s\n", root->value);
+        else
+            printf("%i\n", root->type);
     }
-    // Afficher les enfants du noeud séparés par un espace
-    for (int i = 0; i <= level; i++)
-        printf("  "); // Indentation
-    if (node->children)
+    else
     {
-        for (int i = 0; node->children[i] != NULL; i++)
-        {
-            // Afficher la valeur du noeud s'il y en a une
-            if (node->children[i]->value != NULL)
-                printf("%s ", node->children[i]->value);
-            else
-                printf("%i ", node->children[i]->type);
-            prettyprint(node->children[i], level+1);
-        }
+        if (root->value != NULL)
+            printf("-%s\n", root->value);
+        else
+            printf("-%i\n", root->type);
     }
-    printf("\n");
-}
-
-
-int findHeight(struct Node* root) {
-    if (root == NULL) {
-        return 0;
-    }
-    int maxHeight = 0;
-    int number = 0;
-    while (root->children[number] != NULL) 
+    int sons = 0;
+    if(root->children)
     {
-        number++;
+        while (root->children[sons] != NULL)
+            sons++;
     }
-    for (int i = 0; i < number; i++) 
+    for (int i = 0; i < sons; i++)
     {
-        int height = findHeight(root->children[i]);
-        maxHeight = max(maxHeight, height);
+        sexyprint(root->children[i], level + 1);
     }
-    return maxHeight + 1;
-}
-
-void sexyprint(struct Node *node)
-{
-    int max_height = findHeight(node);
-
 }

@@ -23,6 +23,6 @@ struct Node *parseAndOr();
 struct Node *parsePipeline();
 struct Node *parseCommand();
 struct Node *parseSimpleCommand();
-void prettyprint(struct Node *node, int level);
+void sexyprint(struct Node *node, int level);
 
 #endif /* !PARSER_H */

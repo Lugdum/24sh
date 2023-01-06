@@ -14,7 +14,7 @@ int main(int argc, char **argv)
         print_token(tokens);
         printf("AST:\n");
         struct Node *root = parse(tokens);
-        prettyprint(root, 0);
+        sexyprint(root, 0);
 
         return 0;
     }
