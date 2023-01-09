@@ -36,6 +36,8 @@ struct Token *process(char *str, struct Token *tok)
         token->type = ELSE;
     else if (!strcmp("fi", str))
         token->type = FI;
+    else if (!strcmp("|", str))
+        token->type = PIPE;
     else if (!strcmp(";", str))
         token->type = SC;
     else if (!strcmp("\n", str))
@@ -134,6 +136,9 @@ void print_token(struct Token *token) {
         case WORD:
             printf("%s ", token->value);
             break;
+        case PIPE:
+            printf("PIPE ");
+            break;
         case EF:
             printf("FIN");
             break;
@@ -145,12 +150,11 @@ void print_token(struct Token *token) {
     }
     printf("\n");
 }
-
 /*
 int main(int argc, char *argv[])
 {
     if (argc == 2)
         print_token(lexer(argv[1]));
     return 0;
-}*/
-
+}
+*/
