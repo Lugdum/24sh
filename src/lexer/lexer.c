@@ -21,7 +21,12 @@ struct Token *process(char *str, struct Token *tok)
     token->value = NULL;
     token->next = NULL;
     
-    if (!strcmp("if", str))
+    if (strlen(str) == 0)
+    {
+        free(token);
+        return tok;
+    }
+    else if (!strcmp("if", str))
         token->type = IF;
     else if (!strcmp("then", str))
         token->type = THEN;
@@ -42,7 +47,10 @@ struct Token *process(char *str, struct Token *tok)
     else if (!strcmp("or", str))
         token->type = OR;
     else if (!strcmp(" ", str))
+    {
+        free(token);
         return tok;
+    }
     else
     {
         token->type = WORD;
@@ -138,7 +146,8 @@ void print_token(struct Token *token) {
     printf("\n");
 }
 
-/*int main(int argc, char *argv[])
+/*
+int main(int argc, char *argv[])
 {
     if (argc == 2)
         print_token(lexer(argv[1]));
