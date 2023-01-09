@@ -26,13 +26,14 @@ struct Node {
 };
 
 struct Node *parse(struct Token *token);
-struct Node *parseList(struct Token **token);
+struct Node *parseList(struct Token **token, int compound);
 struct Node *parseAndOr(struct Token **token);
 struct Node *parsePipeline(struct Token **token);
 struct Node *parseCommand(struct Token **token);
 struct Node *parseSimpleCommand(struct Token **token);
 struct Node *parseWord(struct Token **token);
 struct Node *parseToken(struct Token **token);
+struct Node *parseIf(struct Token **token);
 void prettyprint(struct Node *ast);
 void print_node(struct Node *node, int parent);
 

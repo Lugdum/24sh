@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+// Fonction principale
 struct Node *parse(struct Token *token)
 {
     struct Node *ast = NULL;
@@ -16,7 +17,7 @@ struct Node *parse(struct Token *token)
         return ast;
 
     // Sinon, parser la liste
-    ast = parseList(&token);
+    ast = parseList(&token, 0);
 
     // Si la liste se termine par '\n' ou EOF, renvoyer le résultat
     if (token->type == EF || token->type == NL)
@@ -27,7 +28,8 @@ struct Node *parse(struct Token *token)
     return NULL;
 }
 
-struct Node *parseList(struct Token **token)
+// Parser les listes
+struct Node *parseList(struct Token **token, int compound)
 {
     struct Node *ast = NULL;
     // Parser le premier élément de la liste
@@ -50,7 +52,7 @@ struct Node *parseList(struct Token **token)
     list->nb_children = 1;
 
     int i = 1;
-    while (*token != NULL && (*token)->type == SC && (*token)->type != EF && (*token)->type != NL)
+    while (*token != NULL && (*token)->type == SC && (*token)->type != EF && ((*token)->type != NL || compound))
     {
         // Skip ';'
         (*token) = (*token)->next;
@@ -71,7 +73,7 @@ error:
     return NULL;
 }
 
-
+// Parser les conditions AND OR
 struct Node *parseAndOr(struct Token **token)
 {
     struct Node *ast = NULL;
@@ -109,9 +111,18 @@ struct Node *parseAndOr(struct Token **token)
         ast = and_or;
     }
 
+    if (*token != NULL && (*token)->type == IF)
+    {
+        // Appeler parseIf pour traiter la commande "IF THEN ELSE FI"
+        struct Node *if_node = parseIf(token);
+        if (if_node != NULL)
+            return if_node;
+    }
+
     return ast;
 }
 
+// Parser les pipelines
 struct Node *parsePipeline(struct Token **token)
 {
     struct Node *res = NULL;
@@ -151,6 +162,7 @@ struct Node *parsePipeline(struct Token **token)
     return res;
 }
 
+// Parser les commandes
 struct Node *parseCommand(struct Token **token)
 {
     struct Node *ast = NULL;
@@ -162,9 +174,12 @@ struct Node *parseCommand(struct Token **token)
 
     // Parser le premier élément de la commande
     ast->children = calloc(1, sizeof(struct Node*));
+    ast->type = AST_COMMAND;
     if (ast->children == NULL)
         goto error;
     ast->children[0] = parseSimpleCommand(token);
+    if (!ast->children[0])
+        return NULL;
     ast->nb_children = 1;
 
     // S'il y a < 1 élément suivant
@@ -188,6 +203,7 @@ error:
     return NULL;
 }
 
+// Parser les commandes simples
 struct Node *parseSimpleCommand(struct Token **token)
 {
     struct Node *res = NULL;
@@ -238,10 +254,11 @@ struct Node *parseSimpleCommand(struct Token **token)
     return res;
 }
 
+// Parser les mots
 struct Node *parseWord(struct Token **token)
 {
     if ((*token)->type != WORD)
-        return parseToken(token);
+        return NULL;
 
     if (*token == NULL)
         return NULL;
@@ -262,6 +279,7 @@ struct Node *parseWord(struct Token **token)
     return word;
 }
 
+// Parser les tokens (surement inutile je sais plus pourquoi j'ai fait ca)
 struct Node *parseToken(struct Token **token)
 {
     if (*token == NULL)
@@ -306,6 +324,83 @@ struct Node *parseToken(struct Token **token)
     return tok;
 }
 
+
+// Parser les IFs
+struct Node *parseIf(struct Token **token)
+{
+    // Vérifier si le prochain token est "IF"
+    if ((*token) == NULL || (*token)->type != IF)
+        return NULL;
+
+    // Créer un noeud "IF" pour l'AST
+    struct Node *if_node = calloc(1, sizeof(struct Node));
+    if (if_node == NULL)
+        return NULL;
+    if_node->type = AST_IF;
+
+    // Passer au token suivant (qui devrait être la condition)
+    (*token) = (*token)->next;
+
+    // Analyser la condition et l'ajouter en tant qu'enfant du noeud "IF"
+    if_node->children = calloc(1, sizeof(struct Node*));
+    if (if_node->children == NULL)
+        goto error;
+    if_node->children[0] = parseList(token, 1);
+    if (if_node->children[0] == NULL)
+        goto error;
+    if_node->nb_children = 1;
+
+    // Vérifier si le prochain token est "THEN"
+    if ((*token) == NULL || (*token)->type != THEN)
+        goto error;
+
+    // Passer au token suivant (qui devrait être la première commande du "THEN")
+    (*token) = (*token)->next;
+
+    // Analyser les commandes du "THEN" et les ajouter en tant qu'enfants du noeud "IF"
+    if_node->children = realloc(if_node->children, 2 * sizeof(struct Node*));
+    if (if_node->children == NULL)
+        goto error;
+    if_node->children[1] = parseList(token, 1);
+    if (if_node->children[1] == NULL)
+        goto error;
+    if_node->nb_children = 2;
+
+    // Vérifier si le prochain token est "ELSE"
+    if ((*token) != NULL && (*token)->type == ELSE)
+    {
+        // Passer au token suivant (qui devrait être la première commande du "ELSE")
+        (*token) = (*token)->next;
+
+        // Analyser les commandes du "ELSE" et les ajouter en tant qu'enfants du noeud "IF"
+        if_node->children = realloc(if_node->children, 3 * sizeof(struct Node*));
+        if (if_node->children == NULL)
+            goto error;
+        if_node->children[2] = parseList(token, 1);
+        if (if_node->children[2] == NULL)
+            goto error;
+        if_node->nb_children = 3;
+    }
+
+    // Vérifier si le prochain token est "FI"
+    if ((*token) == NULL || (*token)->type != FI)
+        goto error;
+
+    // Passer au token suivant
+    (*token) = (*token)->next;
+
+    // Renvoyer le noeud "IF" de l'AST
+    return if_node;
+
+error:
+    // Libérer la mémoire du noeud "IF" et de ses enfants en cas d'erreur
+    //freeNode(if_node);
+    return NULL;
+}
+
+
+// ----------------------------------------------------------------
+// Print AST in dot
 void prettyprint(struct Node *ast) {
     printf("digraph ast {\n");
     printf("node [shape=box];\n");
