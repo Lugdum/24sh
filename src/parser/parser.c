@@ -172,7 +172,7 @@ struct Node *parseCommand(struct Token **token)
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type >= SC)
+    while (*token != NULL && (*token)->type >= SC && (*token)->type != EF)
     {
         (*token) = (*token)->next;
         ast->children = realloc(ast->children, (i+1) * sizeof(struct Node*));
