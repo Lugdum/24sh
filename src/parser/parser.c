@@ -8,22 +8,20 @@
 struct Node *parse(struct Token *token)
 {
     struct Node *ast = NULL;
-    // Traiter le cas où la liste est vide
+    // Cas d'erreur
     if (token == NULL)
         return ast;
-
-    // Traiter le cas où la liste se termine par EOF ou '\n'
     if (token->type == EF || token->type == NL)
         return ast;
 
-    // Sinon, parser la liste
+    // Parser
     ast = parseList(&token, 0);
 
-    // Si la liste se termine par '\n' ou EOF, renvoyer le résultat
+    // On est bon
     if (token->type == EF || token->type == NL)
         return ast;
 
-    // Sinon, il y a une erreur de syntaxe
+    // Erreur de syntax
     printf("Erreur de syntaxe : la liste ne se termine pas par EOF ou '\\n'\n");
     return NULL;
 }
@@ -35,15 +33,13 @@ struct Node *parseList(struct Token **token, int compound)
     // Parser le premier élément de la liste
     ast = parseAndOr(token);
 
-    // Si la liste est vide, renvoyer le résultat
     if (*token == NULL)
         return ast;
 
-    // S'il y a < 1 élément suivant
+    // Creer le noeud liste blabla
     struct Node *list = calloc(1, sizeof(struct Node));
     if (list == NULL)
         return NULL;
-
     list->type = AST_LIST;
     list->children = calloc(1, sizeof(struct Node*));
     if (list->children == NULL)
@@ -51,6 +47,7 @@ struct Node *parseList(struct Token **token, int compound)
     list->children[0] = ast;
     list->nb_children = 1;
 
+    // S'il y a plusieurs trucs
     int i = 1;
     while (*token != NULL && (*token)->type == SC && (*token)->type != EF && ((*token)->type != NL || compound))
     {
@@ -77,14 +74,13 @@ error:
 struct Node *parseAndOr(struct Token **token)
 {
     struct Node *ast = NULL;
-    // Parser le premier élément de l'AND_OR
+    // Parser le premier élément de AND_OR
     ast = parsePipeline(token);
 
-    // Si l'AND_OR est vide, renvoyer le résultat
     if (*token == NULL)
         return ast;
 
-    // S'il y a < 1 élément suivant
+    // S'il y a plusieurs trucs
     while (*token != NULL && ((*token)->type == AND || (*token)->type == OR))
     {
         // Skip 'AND' ou 'OR'
@@ -92,7 +88,7 @@ struct Node *parseAndOr(struct Token **token)
         (*token) = (*token)->next;
         struct Node *right = parsePipeline(token);
 
-        // Créer un noeud AND_OR et affecter à ses enfants les noeuds gauche et droit
+        // Creer le noeud AND_OR donner les commandes a droite et a gauche
         struct Node *and_or = calloc(1, sizeof(struct Node));
         if (and_or == NULL)
             return NULL;
@@ -106,14 +102,12 @@ struct Node *parseAndOr(struct Token **token)
         and_or->children[0] = ast;
         and_or->children[1] = right;
         and_or->nb_children = 2;
-
-        // Mettre à jour le noeud résultat
         ast = and_or;
     }
 
+    // S'il y a un if le parser
     if (*token != NULL && (*token)->type == IF)
     {
-        // Appeler parseIf pour traiter la commande "IF THEN ELSE FI"
         struct Node *if_node = parseIf(token);
         if (if_node != NULL)
             return if_node;
@@ -126,21 +120,20 @@ struct Node *parseAndOr(struct Token **token)
 struct Node *parsePipeline(struct Token **token)
 {
     struct Node *res = NULL;
-    // Parser le premier élément de la PIPELINE
+    // Parser le premier element de PIPELINE
     res = parseCommand(token);
 
-    // Si la PIPELINE est vide, renvoyer le résultat
     if (*token == NULL)
         return res;
 
-    // S'il y a < 1 élément suivant
+    // S'il y a plusieurs trucs
     while (*token != NULL && (*token)->type == PIPE)
     {
-        // Consommer le token PIPE et parser le prochain élément
+        // Skip '|'
         (*token) = (*token)->next;
         struct Node *right = parseCommand(token);
 
-        // Créer un noeud PIPELINE et affecter à ses enfants les noeuds gauche et droit
+        // Creer le noeud PIPELINE et donner les commandes a droite et a gauche
         struct Node *pipeline = calloc(1, sizeof(struct Node));
         if (pipeline == NULL)
             return NULL;
@@ -154,8 +147,6 @@ struct Node *parsePipeline(struct Token **token)
         pipeline->children[0] = res;
         pipeline->children[1] = right;
         pipeline->nb_children = 2;
-
-        // Mettre à jour le noeud résultat
         res = pipeline;
     }
 
@@ -165,14 +156,11 @@ struct Node *parsePipeline(struct Token **token)
 // Parser les commandes
 struct Node *parseCommand(struct Token **token)
 {
-    struct Node *ast = NULL;
-
-    // Allouer de la mémoire pour le noeud de commande
-    ast = calloc(1, sizeof(struct Node));
+    struct Node *ast = calloc(1, sizeof(struct Node));
     if (ast == NULL)
         return NULL;
 
-    // Parser le premier élément de la commande
+    // Parser le premier element de la commande
     ast->children = calloc(1, sizeof(struct Node*));
     ast->type = AST_COMMAND;
     if (ast->children == NULL)
@@ -182,7 +170,7 @@ struct Node *parseCommand(struct Token **token)
         return NULL;
     ast->nb_children = 1;
 
-    // S'il y a < 1 élément suivant
+    // S'il y a plusieurs trucs
     int i = 1;
     while (*token != NULL && (*token)->type >= SC)
     {
@@ -210,16 +198,15 @@ struct Node *parseSimpleCommand(struct Token **token)
     // Parser le premier élément de la SIMPLE_COMMAND
     res = parseWord(token);
 
-    // Si la SIMPLE_COMMAND est vide, renvoyer le résultat
     if (*token == NULL)
         return res;
 
-    // S'il y a < 1 élément suivant
+    // S'il y a plusieurs trucs
     while (*token != NULL && (*token)->type == WORD)
     {
         struct Node *word = parseWord(token);
 
-        // Créer un noeud WORD et ajouter le nouveau WORD en tant qu'enfant
+        // Creer le noeud WORD et les ajouter en enfants
         if (!res->nb_children)
         {
             struct Node *new_word = calloc(1, sizeof(struct Node));
@@ -237,6 +224,7 @@ struct Node *parseSimpleCommand(struct Token **token)
             new_word->nb_children = 2;
             res = new_word;
         }
+        // Si le noeud existe deja ajouter a ses enfants en agrandissant la liste
         else
         {
             int i = 0;
@@ -257,10 +245,7 @@ struct Node *parseSimpleCommand(struct Token **token)
 // Parser les mots
 struct Node *parseWord(struct Token **token)
 {
-    if ((*token)->type != WORD)
-        return NULL;
-
-    if (*token == NULL)
+    if (!(*token) || (*token)->type != WORD)
         return NULL;
 
     struct Node *word = calloc(1, sizeof(struct Node));
@@ -279,69 +264,19 @@ struct Node *parseWord(struct Token **token)
     return word;
 }
 
-// Parser les tokens (surement inutile je sais plus pourquoi j'ai fait ca)
-struct Node *parseToken(struct Token **token)
-{
-    if (*token == NULL)
-        return NULL;
-
-    struct Node *tok = calloc(1, sizeof(struct Node));
-    if (tok == NULL)
-        return NULL;
-    tok->type = AST_SIMPLE_COMMAND;
-    tok->nb_children = 0;
-    switch ((*token)->type)
-    {
-    case IF:
-        tok->value = calloc(2, sizeof(char));
-        strcpy(tok->value, "IF");
-        break;
-    case THEN:
-        tok->value = calloc(4, sizeof(char));
-        strcpy(tok->value, "THEN");
-        break;
-    case ELSE:
-        tok->value = calloc(4, sizeof(char));
-        strcpy(tok->value, "ELSE");
-        break;
-    case FI:
-        tok->value = calloc(2, sizeof(char));
-        strcpy(tok->value, "FI");
-        break;
-    
-    default:
-        tok->value = calloc(strlen((*token)->value), sizeof(char));
-        strcpy(tok->value, (*token)->value);
-        break;
-    }
-    if (tok->value == NULL)
-    {
-        free(tok);
-        return NULL;
-    }
-    (*token) = (*token)->next;
-
-    return tok;
-}
-
 
 // Parser les IFs
 struct Node *parseIf(struct Token **token)
 {
-    // Vérifier si le prochain token est "IF"
-    if ((*token) == NULL || (*token)->type != IF)
-        return NULL;
-
-    // Créer un noeud "IF" pour l'AST
+    // Creer le noeud if
     struct Node *if_node = calloc(1, sizeof(struct Node));
     if (if_node == NULL)
         return NULL;
     if_node->type = AST_IF;
 
-    // Passer au token suivant (qui devrait être la condition)
     (*token) = (*token)->next;
 
-    // Analyser la condition et l'ajouter en tant qu'enfant du noeud "IF"
+    // Faire la condition
     if_node->children = calloc(1, sizeof(struct Node*));
     if (if_node->children == NULL)
         goto error;
@@ -350,14 +285,13 @@ struct Node *parseIf(struct Token **token)
         goto error;
     if_node->nb_children = 1;
 
-    // Vérifier si le prochain token est "THEN"
+    // Verifier qu'il y a bien then
     if ((*token) == NULL || (*token)->type != THEN)
         goto error;
 
-    // Passer au token suivant (qui devrait être la première commande du "THEN")
     (*token) = (*token)->next;
 
-    // Analyser les commandes du "THEN" et les ajouter en tant qu'enfants du noeud "IF"
+    // Faire le then
     if_node->children = realloc(if_node->children, 2 * sizeof(struct Node*));
     if (if_node->children == NULL)
         goto error;
@@ -366,13 +300,11 @@ struct Node *parseIf(struct Token **token)
         goto error;
     if_node->nb_children = 2;
 
-    // Vérifier si le prochain token est "ELSE"
+    // Faire le else s'il y en a un
     if ((*token) != NULL && (*token)->type == ELSE)
     {
-        // Passer au token suivant (qui devrait être la première commande du "ELSE")
         (*token) = (*token)->next;
 
-        // Analyser les commandes du "ELSE" et les ajouter en tant qu'enfants du noeud "IF"
         if_node->children = realloc(if_node->children, 3 * sizeof(struct Node*));
         if (if_node->children == NULL)
             goto error;
@@ -382,18 +314,14 @@ struct Node *parseIf(struct Token **token)
         if_node->nb_children = 3;
     }
 
-    // Vérifier si le prochain token est "FI"
+    // Verifier que le if termine par fi
     if ((*token) == NULL || (*token)->type != FI)
         goto error;
 
-    // Passer au token suivant
     (*token) = (*token)->next;
-
-    // Renvoyer le noeud "IF" de l'AST
     return if_node;
 
 error:
-    // Libérer la mémoire du noeud "IF" et de ses enfants en cas d'erreur
     //freeNode(if_node);
     return NULL;
 }
