@@ -159,7 +159,6 @@ struct Node *parseCommand(struct Token **token)
     ast = calloc(1, sizeof(struct Node));
     if (ast == NULL)
         return NULL;
-    ast->type = AST_COMMAND;
 
     // Parser le premier élément de la commande
     ast->children = calloc(1, sizeof(struct Node*));
@@ -172,7 +171,6 @@ struct Node *parseCommand(struct Token **token)
     int i = 1;
     while (*token != NULL && (*token)->type < SC)
     {
-        // Skip '|'
         (*token) = (*token)->next;
         ast->children = realloc(ast->children, (i+1) * sizeof(struct Node*));
         ast->nb_children += 1;
@@ -211,7 +209,7 @@ struct Node *parseSimpleCommand(struct Token **token)
             struct Node *new_word = calloc(1, sizeof(struct Node));
             if (new_word == NULL)
                 return NULL;
-            new_word->type = WORD;
+            new_word->type = AST_SIMPLE_COMMAND;
             new_word->children = calloc(2, sizeof(struct Node*));
             if (new_word->children == NULL)
             {
@@ -294,6 +292,8 @@ struct Node *parseToken(struct Token **token)
         break;
     
     default:
+        tok->value = calloc(strlen((*token)->value), sizeof(char));
+        strcpy(tok->value, (*token)->value);
         break;
     }
     if (tok->value == NULL)
@@ -306,43 +306,6 @@ struct Node *parseToken(struct Token **token)
     return tok;
 }
 
-/*void prettyprint(struct Node *ast, int level)
-{
-    if (ast == NULL)
-        return;
-
-    for (int i = 0; i < level; i++)
-        printf("  ");
-
-    switch (ast->type)
-    {
-        case WORDS:
-            printf("WORD: %s\n", ast->value);
-            break;
-        case PIPELINE:
-            printf("PIPE\n");
-            break;
-        case AND_OR:
-            printf("AND_OR\n");
-            break;
-        case LIST:
-            printf("LIST\n");
-            break;
-        case COMMAND:
-            printf("COMMAND\n");
-            break;
-        case SIMPLE_COMMAND:
-            printf("SIMPLE_COMMAND: %s\n", ast->value);
-            break;
-        default:
-            printf("UNKNOWN\n");
-            break;
-    }
-
-    for (int i = 0; i < ast->nb_children; i++)
-        prettyprint(ast->children[i], level+1);
-}*/
-
 void prettyprint(struct Node *ast) {
     printf("digraph ast {\n");
     printf("node [shape=box];\n");
@@ -351,7 +314,7 @@ void prettyprint(struct Node *ast) {
 }
 
 void print_node(struct Node *node, int parent) {
-    static int node_count = 0;
+    static int node_count = 1;
     int current_node = node_count++;
     switch (node->type) {
         case AST_INPUT:

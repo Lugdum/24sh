@@ -138,10 +138,10 @@ void print_token(struct Token *token) {
     printf("\n");
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     if (argc == 2)
         print_token(lexer(argv[1]));
     return 0;
-}
+}*/
 
