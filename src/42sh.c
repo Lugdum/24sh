@@ -1,5 +1,6 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "exec/exec.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +16,8 @@ int main(int argc, char **argv)
         printf("AST:\n");
         struct Node *root = parse(tokens);
         prettyprint(root);
+        printf("\nEXEX:\n");
+        node_type(root);
 
         return 0;
     }
