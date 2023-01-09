@@ -184,7 +184,7 @@ struct Node *parseCommand(struct Token **token)
 
     // S'il y a < 1 élément suivant
     int i = 1;
-    while (*token != NULL && (*token)->type < SC)
+    while (*token != NULL && (*token)->type >= SC)
     {
         (*token) = (*token)->next;
         ast->children = realloc(ast->children, (i+1) * sizeof(struct Node*));
