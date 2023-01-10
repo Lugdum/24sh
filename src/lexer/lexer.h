@@ -9,7 +9,7 @@ enum TokenType
     ELSE,
     FI,
     SC,
-    EOF,
+    EF,
     NL,
     SQ,
     AND,
@@ -25,7 +25,7 @@ struct Token
     struct Token *next;
 };
 
-struct Token *lex(char *arg);
+struct Token *lexer(char *arg);
 
 void print_token(struct Token *token);
 

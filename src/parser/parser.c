@@ -4,60 +4,61 @@
 #include <stdio.h>
 #include <string.h>
 
+// Fonction principale
 struct Node *parse(struct Token *token)
 {
-    struct Node *res = NULL;
-    // Traiter le cas où la liste est vide
+    struct Node *ast = NULL;
+    // Cas d'erreur
     if (token == NULL)
-        return res;
+        return ast;
+    if (token->type == EF || token->type == NL)
+        return ast;
 
-    // Traiter le cas où la liste se termine par EOF ou '\n'
-    if (token->type == EOF || token->type == NL)
-        return res;
+    // Parser
+    ast = parseList(&token, 0);
 
-    // Sinon, parser la liste
-    res = parseList(token);
+    // On est bon
+    if (token->type == EF || token->type == NL)
+        return ast;
 
-    // Si la liste se termine par '\n' ou EOF, renvoyer le résultat
-    if (token->type == EOF || token->type == NL)
-        return res;
-
-    // Sinon, il y a une erreur de syntaxe
+    // Erreur de syntax
     printf("Erreur de syntaxe : la liste ne se termine pas par EOF ou '\\n'\n");
     return NULL;
 }
 
-struct Node *parseList(struct Token *token)
+// Parser les listes
+struct Node *parseList(struct Token **token, int compound)
 {
-    struct Node *res = NULL;
+    struct Node *ast = NULL;
     // Parser le premier élément de la liste
-    res = parseAndOr(token);
+    ast = parseAndOr(token);
 
-    // Si la liste est vide, renvoyer le résultat
-    if (token == NULL)
-        return res;
+    if (*token == NULL)
+        return ast;
 
-    // Sinon, il y a au moins un élément suivant
+    // Creer le noeud liste blabla
     struct Node *list = calloc(1, sizeof(struct Node));
     if (list == NULL)
         return NULL;
-
-    list->type = LIST;
+    list->type = AST_LIST;
     list->children = calloc(1, sizeof(struct Node*));
     if (list->children == NULL)
         goto error;
-    list->children[0] = res;
+    list->children[0] = ast;
+    list->nb_children = 1;
 
+    // S'il y a plusieurs trucs
     int i = 1;
-    while (token != NULL && token->type == SC && token->type != EOF && token->type != NL)
+    while (*token != NULL && (*token)->type == SC && (*token)->type != EF && ((*token)->type != NL || compound))
     {
-        // Consommer le ';' et parser le prochain élément
-        token = token->next;
-        res = parseAndOr(token);
+        // Skip ';'
+        (*token) = (*token)->next;
+        ast = parseAndOr(token);
         list->children = realloc(list->children, (i+1) * sizeof(struct Node*));
+        list->nb_children += 1;
         if (list->children == NULL)
             goto error;
-        list->children[i] = res;
+        list->children[i] = ast;
 
         i++;
     }
@@ -69,68 +70,74 @@ error:
     return NULL;
 }
 
-
-struct Node *parseAndOr(struct Token *token)
+// Parser les conditions AND OR
+struct Node *parseAndOr(struct Token **token)
 {
-    struct Node *res = NULL;
-    // Parser le premier élément de l'AND_OR
-    res = parsePipeline(token);
+    struct Node *ast = NULL;
+    // Parser le premier élément de AND_OR
+    ast = parsePipeline(token);
 
-    // Si l'AND_OR est vide, renvoyer le résultat
-    if (token == NULL)
-        return res;
+    if (*token == NULL)
+        return ast;
 
-    // Sinon, il y a au moins un élément suivant
-    while (token != NULL && (token->type == AND || token->type == OR))
+    // S'il y a plusieurs trucs
+    while (*token != NULL && ((*token)->type == AND || (*token)->type == OR))
     {
-        // Consommer le token AND ou OR et parser le prochain élément
-        enum TokenType op = token->type;
-        token = token->next;
+        // Skip 'AND' ou 'OR'
+        enum TokenType op = (*token)->type;
+        (*token) = (*token)->next;
         struct Node *right = parsePipeline(token);
 
-        // Créer un noeud AND_OR et affecter à ses enfants les noeuds gauche et droit
+        // Creer le noeud AND_OR donner les commandes a droite et a gauche
         struct Node *and_or = calloc(1, sizeof(struct Node));
         if (and_or == NULL)
-            return NULL; // Erreur d'allocation de mémoire
+            return NULL;
         and_or->type = op;
         and_or->children = calloc(2, sizeof(struct Node*));
         if (and_or->children == NULL)
         {
             free(and_or);
-            return NULL; // Erreur d'allocation de mémoire
+            return NULL;
         }
-        and_or->children[0] = res;
+        and_or->children[0] = ast;
         and_or->children[1] = right;
-
-        // Mettre à jour le noeud résultat
-        res = and_or;
+        and_or->nb_children = 2;
+        ast = and_or;
     }
 
-    return res;
+    // S'il y a un if le parser
+    if (*token != NULL && (*token)->type == IF)
+    {
+        struct Node *if_node = parseIf(token);
+        if (if_node != NULL)
+            return if_node;
+    }
+
+    return ast;
 }
 
-struct Node *parsePipeline(struct Token *token)
+// Parser les pipelines
+struct Node *parsePipeline(struct Token **token)
 {
     struct Node *res = NULL;
-    // Parser le premier élément de la PIPELINE
+    // Parser le premier element de PIPELINE
     res = parseCommand(token);
 
-    // Si la PIPELINE est vide, renvoyer le résultat
-    if (token == NULL)
+    if (*token == NULL)
         return res;
 
-    // Sinon, il y a au moins un élément suivant
-    while (token != NULL && token->type == PIPE)
+    // S'il y a plusieurs trucs
+    while (*token != NULL && (*token)->type == PIPE)
     {
-        // Consommer le token PIPE et parser le prochain élément
-        token = token->next;
+        // Skip '|'
+        (*token) = (*token)->next;
         struct Node *right = parseCommand(token);
 
-        // Créer un noeud PIPELINE et affecter à ses enfants les noeuds gauche et droit
+        // Creer le noeud PIPELINE et donner les commandes a droite et a gauche
         struct Node *pipeline = calloc(1, sizeof(struct Node));
         if (pipeline == NULL)
             return NULL;
-        pipeline->type = PIPELINE;
+        pipeline->type = AST_PIPELINE;
         pipeline->children = calloc(2, sizeof(struct Node*));
         if (pipeline->children == NULL)
         {
@@ -139,120 +146,235 @@ struct Node *parsePipeline(struct Token *token)
         }
         pipeline->children[0] = res;
         pipeline->children[1] = right;
-
-        // Mettre à jour le noeud résultat
+        pipeline->nb_children = 2;
         res = pipeline;
     }
 
     return res;
 }
 
-struct Node *parseCommand(struct Token *token)
+// Parser les commandes
+struct Node *parseCommand(struct Token **token)
 {
-    struct Node *res = NULL;
-    // Si le premier token est un 'if', 'then', 'elif', 'else' ou 'fi', il s'agit d'une structure conditionnelle
-    if (token != NULL && (token->type == IF || token->type == THEN || token->type == ELIF || token->type == ELSE || token->type == FI))
+    struct Node *ast = calloc(1, sizeof(struct Node));
+    if (ast == NULL)
+        return NULL;
+
+    // Parser le premier element de la commande
+    ast->children = calloc(1, sizeof(struct Node*));
+    ast->type = AST_COMMAND;
+    if (ast->children == NULL)
+        goto error;
+    ast->children[0] = parseSimpleCommand(token);
+    if (!ast->children[0])
+        return NULL;
+    ast->nb_children = 1;
+
+    // S'il y a plusieurs trucs
+    int i = 1;
+    while (*token != NULL && (*token)->type >= SC && (*token)->type != EF)
     {
-        // Créer un noeud COMMAND
-        res = calloc(1, sizeof(struct Node));
-        if (res == NULL)
-            return NULL; // Erreur d'allocation de mémoire
-        res->type = COMMAND;
-        res->children = calloc(5, sizeof(struct Node*));
-        if (res->children == NULL)
-        {
-            free(res);
-            return NULL; // Erreur d'allocation de mémoire
-        }
+        (*token) = (*token)->next;
+        ast->children = realloc(ast->children, (i+1) * sizeof(struct Node*));
+        ast->nb_children += 1;
+        if (ast->children == NULL)
+            goto error;
+        ast->children[i] = parseSimpleCommand(token);
 
-        // Affecter à chaque enfant le noeud correspondant à la structure conditionnelle
-        res->children[0] = parseSimpleCommand(token);
-        res->children[1] = parseList(token->next);
-        res->children[2] = parseSimpleCommand(token->next);
-        res->children[3] = parseList(token->next);
-        res->children[4] = parseSimpleCommand(token->next);
-    }
-    else // Sinon, il s'agit d'une commande simple
-        res = parseSimpleCommand(token);
-
-    return res;
-}
-
-struct Node *parseSimpleCommand(struct Token *token)
-{
-    struct Node *res = NULL;
-    // Si la commande est vide, renvoyer NULL
-    if (token == NULL)
-        return res;
-
-    // Créer un noeud SIMPLE_COMMAND
-    res = calloc(1, sizeof(struct Node));
-    if (res == NULL)
-        return NULL; // Erreur d'allocation de mémoire
-    res->type = SIMPLE_COMMAND;
-    res->children = calloc(1, sizeof(struct Node*));
-    if (res->children == NULL)
-    {
-        free(res);
-        return NULL; // Erreur d'allocation de mémoire
-    }
-
-    // Parser les éléments de type WORD de la commande simple
-    int i = 0;
-    while (token != NULL && token->type == WORD)
-    {
-        // Créer un noeud WORD et affecter à son enfant le token courant
-        struct Node *word = calloc(1, sizeof(struct Node));
-        if (word == NULL)
-        {
-            free(res->children);
-            free(res);
-            return NULL; // Erreur d'allocation de mémoire
-        }
-        word->type = WORD;
-        word->value = calloc(strlen(token->value) + 1, sizeof(char));
-        if (word->value == NULL)
-        {
-            free(word);
-            free(res->children);
-            free(res);
-            return NULL; // Erreur d'allocation de mémoire
-        }
-        strcpy(word->value, token->value);
-
-        // Affecter le noeud WORD à l'enfant de SIMPLE_COMMAND
-        res->children = realloc(res->children, (i+1) * sizeof(struct Node*));
-        if (res->children == NULL)
-        {
-            free(word->value);
-            free(word);
-            free(res);
-            return NULL; // Erreur d'allocation de mémoire
-        }
-        res->children[i] = word;
-
-        // Consommer le token WORD
-        token = token->next;
         i++;
     }
 
+    return ast;
+
+error:
+    free(ast);
+    return NULL;
+}
+
+// Parser les commandes simples
+struct Node *parseSimpleCommand(struct Token **token)
+{
+    struct Node *res = NULL;
+    // Parser le premier élément de la SIMPLE_COMMAND
+    res = parseWord(token);
+
+    if (*token == NULL)
+        return res;
+
+    // S'il y a plusieurs trucs
+    while (*token != NULL && (*token)->type == WORD)
+    {
+        struct Node *word = parseWord(token);
+
+        // Creer le noeud WORD et les ajouter en enfants
+        if (!res->nb_children)
+        {
+            struct Node *new_word = calloc(1, sizeof(struct Node));
+            if (new_word == NULL)
+                return NULL;
+            new_word->type = AST_SIMPLE_COMMAND;
+            new_word->children = calloc(2, sizeof(struct Node*));
+            if (new_word->children == NULL)
+            {
+                free(new_word);
+                return NULL;
+            }
+            new_word->children[0] = res;
+            new_word->children[1] = word;
+            new_word->nb_children = 2;
+            res = new_word;
+        }
+        // Si le noeud existe deja ajouter a ses enfants en agrandissant la liste
+        else
+        {
+            int i = 0;
+            while (res->children[i] != NULL)
+                i++;
+            res->children = realloc(res->children, (i+2) * sizeof(struct Node*));
+            if (res->children == NULL)
+                return NULL;
+            res->children[i] = word;
+            res->nb_children = i + 1;
+            res->children[i+1] = NULL;
+        }
+    }
+
     return res;
 }
 
-void prettyprint(struct Node *node, int level)
+// Parser les mots
+struct Node *parseWord(struct Token **token)
 {
-    // Si le noeud est NULL, il n'y a rien à afficher
-    if (node == NULL)
-    return;
-    // Afficher les enfants du noeud séparés par un espace
-    for (int i = 0; i < level; i++)
-        printf("  "); // Indentation
-    for (int i = 0; node->children[i] != NULL; i++)
+    if (!(*token) || (*token)->type != WORD)
+        return NULL;
+
+    struct Node *word = calloc(1, sizeof(struct Node));
+    if (word == NULL)
+        return NULL;
+    word->type = AST_ELEMENT;
+    word->nb_children = 0;
+    word->value = strdup((*token)->value);
+    if (word->value == NULL)
     {
-        // Afficher la valeur du noeud s'il y en a une
-        if (node->children[i]->value != NULL)
-            printf("%s ", node->children[i]->value);
-        prettyprint(node->children[i], level+1);
+        free(word);
+        return NULL;
     }
-    printf("\n");
+    (*token) = (*token)->next;
+
+    return word;
+}
+
+
+// Parser les IFs
+struct Node *parseIf(struct Token **token)
+{
+    // Creer le noeud if
+    struct Node *if_node = calloc(1, sizeof(struct Node));
+    if (if_node == NULL)
+        return NULL;
+    if_node->type = AST_IF;
+
+    (*token) = (*token)->next;
+
+    // Faire la condition
+    if_node->children = calloc(1, sizeof(struct Node*));
+    if (if_node->children == NULL)
+        goto error;
+    if_node->children[0] = parseList(token, 1);
+    if (if_node->children[0] == NULL)
+        goto error;
+    if_node->nb_children = 1;
+
+    // Verifier qu'il y a bien then
+    if ((*token) == NULL || (*token)->type != THEN)
+        goto error;
+
+    (*token) = (*token)->next;
+
+    // Faire le then
+    if_node->children = realloc(if_node->children, 2 * sizeof(struct Node*));
+    if (if_node->children == NULL)
+        goto error;
+    if_node->children[1] = parseList(token, 1);
+    if (if_node->children[1] == NULL)
+        goto error;
+    if_node->nb_children = 2;
+
+    // Faire le else s'il y en a un
+    if ((*token) != NULL && (*token)->type == ELSE)
+    {
+        (*token) = (*token)->next;
+
+        if_node->children = realloc(if_node->children, 3 * sizeof(struct Node*));
+        if (if_node->children == NULL)
+            goto error;
+        if_node->children[2] = parseList(token, 1);
+        if (if_node->children[2] == NULL)
+            goto error;
+        if_node->nb_children = 3;
+    }
+
+    // Verifier que le if termine par fi
+    if ((*token) == NULL || (*token)->type != FI)
+        goto error;
+
+    (*token) = (*token)->next;
+    return if_node;
+
+error:
+    //freeNode(if_node);
+    return NULL;
+}
+
+
+// ----------------------------------------------------------------
+// Print AST in dot
+void prettyprint(struct Node *ast) {
+    printf("digraph ast {\n");
+    printf("node [shape=box];\n");
+    print_node(ast, 0);
+    printf("}\n");
+}
+
+void print_node(struct Node *node, int parent) {
+    static int node_count = 1;
+    int current_node = node_count++;
+    switch (node->type) {
+        case AST_INPUT:
+            printf("node%d [label=\"AST_INPUT\"];\n", current_node);
+            break;
+        case AST_AND_OR:
+            printf("node%d [label=\"AND/OR\"];\n", current_node);
+            break;
+        case AST_LIST:
+            printf("node%d [label=\"LIST\"];\n", current_node);
+            break;
+        case AST_PIPELINE:
+            printf("node%d [label=\"PIPELINE\"];\n", current_node);
+            break;
+        case AST_COMMAND:
+            printf("node%d [label=\"COMMAND\"];\n", current_node);
+            break;
+        case AST_SIMPLE_COMMAND:
+            printf("node%d [label=\"SIMPLE_COMMAND\"];\n", current_node);
+            break;
+        case AST_ELEMENT:
+            printf("node%d [label=\"%s\"];\n", current_node, node->value);
+            break;
+        case AST_CMD:
+            printf("node%d [label=\"CMD\"];\n", current_node);
+            break;
+        case AST_IF:
+            printf("node%d [label=\"IF\"];\n", current_node);
+            break;
+        default:
+            printf("node%d [label=\"UNKNOWN\"];\n", current_node);
+            break;
+    }
+    if (parent != 0) {
+        printf("node%d -> node%d;\n", parent, current_node);
+    }
+    for (int i = 0; i < node->nb_children; i++) {
+        print_node(node->children[i], current_node);
+    }
 }
