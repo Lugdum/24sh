@@ -64,7 +64,7 @@ int parseIf(struct Token **token, struct Node **if_node)
     return 0;
 
 error:
-    // freeNode(if_node);
+    free_ast(*if_node);
     return 2;
 }
 
@@ -108,7 +108,7 @@ int parseFor(struct Token **token, struct Node **ast)
     (*ast)->children = calloc(2, sizeof(struct Node *));
     if ((*ast)->children == NULL)
     {
-        free(ast);
+        free_ast(*ast);
         return 2;
     }
     (*ast)->children[0] = cond;
