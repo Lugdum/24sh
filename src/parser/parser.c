@@ -329,52 +329,62 @@ error:
 
 // ----------------------------------------------------------------
 // Print AST in dot
-void prettyprint(struct Node *ast) {
-    printf("digraph ast {\n");
-    printf("node [shape=box];\n");
-    print_node(ast, 0);
-    printf("}\n");
+void prettyprint(struct Node *ast, FILE *f) {
+    printf("AST:\n");
+    fprintf(f, "digraph ast {\n");
+    fprintf(f, "node [shape=box];\n");
+    print_node(ast, 0, f);
+    fprintf(f, "}\n");
 }
 
-void print_node(struct Node *node, int parent) {
+void sexyprint(struct Node *ast) {
+    FILE *f = fopen("./graph", "w");
+    fprintf(f, "digraph ast {\n");
+    fprintf(f, "node [shape=box];\n");
+    print_node(ast, 0, f);
+    fprintf(f, "}\n");
+    fclose(f);
+}
+
+void print_node(struct Node *node, int parent, FILE *f) {
     static int node_count = 1;
     int current_node = node_count++;
     switch (node->type) {
         case AST_INPUT:
-            printf("node%d [label=\"AST_INPUT\"];\n", current_node);
+            fprintf(f, "node%d [label=\"AST_INPUT\"];\n", current_node);
             break;
         case AST_AND_OR:
-            printf("node%d [label=\"AND/OR\"];\n", current_node);
+            fprintf(f, "node%d [label=\"AND/OR\"];\n", current_node);
             break;
         case AST_LIST:
-            printf("node%d [label=\"LIST\"];\n", current_node);
+            fprintf(f, "node%d [label=\"LIST\"];\n", current_node);
             break;
         case AST_PIPELINE:
-            printf("node%d [label=\"PIPELINE\"];\n", current_node);
+            fprintf(f, "node%d [label=\"PIPELINE\"];\n", current_node);
             break;
         case AST_COMMAND:
-            printf("node%d [label=\"COMMAND\"];\n", current_node);
+            fprintf(f, "node%d [label=\"COMMAND\"];\n", current_node);
             break;
         case AST_SIMPLE_COMMAND:
-            printf("node%d [label=\"SIMPLE_COMMAND\"];\n", current_node);
+            fprintf(f, "node%d [label=\"SIMPLE_COMMAND\"];\n", current_node);
             break;
         case AST_ELEMENT:
-            printf("node%d [label=\"%s\"];\n", current_node, node->value);
+            fprintf(f, "node%d [label=\"%s\"];\n", current_node, node->value);
             break;
         case AST_CMD:
-            printf("node%d [label=\"CMD\"];\n", current_node);
+            fprintf(f, "node%d [label=\"CMD\"];\n", current_node);
             break;
         case AST_IF:
-            printf("node%d [label=\"IF\"];\n", current_node);
+            fprintf(f, "node%d [label=\"IF\"];\n", current_node);
             break;
         default:
-            printf("node%d [label=\"UNKNOWN\"];\n", current_node);
+            fprintf(f, "node%d [label=\"UNKNOWN\"];\n", current_node);
             break;
     }
     if (parent != 0) {
-        printf("node%d -> node%d;\n", parent, current_node);
+        fprintf(f, "node%d -> node%d;\n", parent, current_node);
     }
     for (int i = 0; i < node->nb_children; i++) {
-        print_node(node->children[i], current_node);
+        print_node(node->children[i], current_node, f);
     }
 }

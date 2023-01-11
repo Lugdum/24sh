@@ -34,7 +34,8 @@ struct Node *parseSimpleCommand(struct Token **token);
 struct Node *parseWord(struct Token **token);
 struct Node *parseToken(struct Token **token);
 struct Node *parseIf(struct Token **token);
-void prettyprint(struct Node *ast);
-void print_node(struct Node *node, int parent);
+void prettyprint(struct Node *ast, FILE *f);
+void print_node(struct Node *node, int parent, FILE *f);
+void sexyprint(struct Node *ast);
 
 #endif /* !PARSER_H */
