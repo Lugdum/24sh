@@ -48,6 +48,14 @@ struct Token *process(char *str, struct Token *tok)
         token->type = AND;
     else if (!strcmp("or", str))
         token->type = OR;
+    else if (!strcmp("for", str))
+        token->type = FOR;
+    else if (!strcmp("in", str))
+        token->type = IN;
+    else if (!strcmp("do", str))
+        token->type = DO;
+    else if (!strcmp("done", str))
+        token->type = DONE;
     else if (!strcmp(" ", str))
     {
         free(token);
@@ -123,6 +131,18 @@ void print_token(struct Token *token) {
             break;
         case OR:
             printf("OR ");
+            break;
+        case FOR:
+            printf("FOR ");
+            break;
+        case IN:
+            printf("IN ");
+            break;
+        case DO:
+            printf("DO ");
+            break;
+        case DONE:
+            printf("DONE ");
             break;
         case SC:
             printf("; ");

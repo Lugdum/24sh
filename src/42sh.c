@@ -1,4 +1,5 @@
 #include "lexer/lexer.h"
+#include "parser/parser_print.h"
 #include "parser/parser.h"
 #include "exec/exec.h"
 
