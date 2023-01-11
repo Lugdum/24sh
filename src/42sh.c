@@ -69,19 +69,11 @@ int main(int argc, char **argv)
         struct Node *root = parse(tokens);
 
         // Print if asked in argument
-        if (argc >= 4 && !strcmp(argv[3], "tpp"))
-        {
+        if (argc >= 4 && argv[3][0] == 't')
             print_token(tokens);
+        if (argc >= 4 && (!strcmp(argv[3], "pp") || !strcmp(argv[3], "tpp")))
             prettyprint(root, stdout);
-        }
-        else if (argc >= 4 && !strcmp(argv[3], "tsp"))
-        {
-            print_token(tokens);
-            sexyprint(root);
-        }
-        else if (argc >= 4 && !strcmp(argv[3], "pp"))
-            prettyprint(root, stdout);
-        if (argc >= 4 && !strcmp(argv[3], "sp"))
+        else if (argc >= 4 && (!strcmp(argv[3], "sp") || !strcmp(argv[3], "tsp")))
             sexyprint(root);
         
         node_type(root);
