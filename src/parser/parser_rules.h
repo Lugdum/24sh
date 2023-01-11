@@ -1,10 +1,10 @@
 #ifndef PARSER_RULES_H
 #define PARSER_RULES_H
 
-#include "parser.h"
-#include "../lexer/lexer.h"
-
 #include <stdio.h>
+
+#include "../lexer/lexer.h"
+#include "parser.h"
 
 struct Node *parseIf(struct Token **token);
 struct Node *parseFor(struct Token **token);

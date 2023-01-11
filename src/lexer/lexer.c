@@ -1,26 +1,26 @@
 #include "lexer.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 struct Token *process_end_of_file(struct Token *tok)
 {
-    struct Token *token  = calloc(1, sizeof(struct Token));
+    struct Token *token = calloc(1, sizeof(struct Token));
     token->value = NULL;
     token->next = NULL;
-    
+
     token->type = EF;
-    
+
     tok->next = token;
     return token;
 }
 struct Token *process(char *str, struct Token *tok)
 {
-    struct Token *token  = calloc(1, sizeof(struct Token));
+    struct Token *token = calloc(1, sizeof(struct Token));
     token->value = NULL;
     token->next = NULL;
-    
+
     if (strlen(str) == 0)
     {
         free(token);
@@ -89,7 +89,7 @@ struct Token *lexer(char *input)
         {
             cur[j] = '\0';
             cur_tok = process(cur, cur_tok);
-            
+
             cur[0] = input[i];
             cur[1] = '\0';
             cur_tok = process(cur, cur_tok);
@@ -104,13 +104,16 @@ struct Token *lexer(char *input)
     cur[j] = '\0';
     cur_tok = process(cur, cur_tok);
     cur_tok = process_end_of_file(cur_tok);
-    
+
     return out->next;
 }
 
-void print_token(struct Token *token) {
-    while (token) {
-        switch (token->type) {
+void print_token(struct Token *token)
+{
+    while (token)
+    {
+        switch (token->type)
+        {
         case IF:
             printf("IF ");
             break;
@@ -166,7 +169,7 @@ void print_token(struct Token *token) {
             printf("? ");
             break;
         }
-    token = token->next;
+        token = token->next;
     }
     printf("\n");
 }
