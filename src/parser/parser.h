@@ -1,10 +1,10 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <stdio.h>
+
 #include "../lexer/lexer.h"
 #include "parser_rules.h"
-
-#include <stdio.h>
 
 enum ast_type
 {
@@ -20,7 +20,8 @@ enum ast_type
     AST_FOR
 };
 
-struct Node {
+struct Node
+{
     enum ast_type type;
     struct Node **children;
     int nb_children;

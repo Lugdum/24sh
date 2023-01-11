@@ -1,7 +1,7 @@
 #include "parser.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 // Fonction principale
@@ -41,7 +41,7 @@ struct Node *parseList(struct Token **token)
     if (list == NULL)
         return NULL;
     list->type = AST_LIST;
-    list->children = calloc(1, sizeof(struct Node*));
+    list->children = calloc(1, sizeof(struct Node *));
     if (list->children == NULL)
         goto error;
     list->children[0] = ast;
@@ -49,12 +49,14 @@ struct Node *parseList(struct Token **token)
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type == SC && (*token)->type != EF && ((*token)->type != NL))
+    while (*token != NULL && (*token)->type == SC && (*token)->type != EF
+           && ((*token)->type != NL))
     {
         // Skip ';'
         (*token) = (*token)->next;
         ast = parseAndOr(token);
-        list->children = realloc(list->children, (i+1) * sizeof(struct Node*));
+        list->children =
+            realloc(list->children, (i + 1) * sizeof(struct Node *));
         list->nb_children += 1;
         if (list->children == NULL)
             goto error;
@@ -93,7 +95,7 @@ struct Node *parseAndOr(struct Token **token)
         if (and_or == NULL)
             return NULL;
         and_or->type = op;
-        and_or->children = calloc(2, sizeof(struct Node*));
+        and_or->children = calloc(2, sizeof(struct Node *));
         if (and_or->children == NULL)
         {
             free(and_or);
@@ -112,7 +114,7 @@ struct Node *parseAndOr(struct Token **token)
         if (if_node != NULL)
             return if_node;
     }
-    
+
     // S'il y a un for le parser
     if (*token != NULL && (*token)->type == FOR)
     {
@@ -146,7 +148,7 @@ struct Node *parsePipeline(struct Token **token)
         if (pipeline == NULL)
             return NULL;
         pipeline->type = AST_PIPELINE;
-        pipeline->children = calloc(2, sizeof(struct Node*));
+        pipeline->children = calloc(2, sizeof(struct Node *));
         if (pipeline->children == NULL)
         {
             free(pipeline);
@@ -169,7 +171,7 @@ struct Node *parseCommand(struct Token **token)
         return NULL;
 
     // Parser le premier element de la commande
-    ast->children = calloc(1, sizeof(struct Node*));
+    ast->children = calloc(1, sizeof(struct Node *));
     ast->type = AST_COMMAND;
     if (ast->children == NULL)
         goto error;
@@ -183,7 +185,7 @@ struct Node *parseCommand(struct Token **token)
     while (*token != NULL && (*token)->type >= SC && (*token)->type != EF)
     {
         (*token) = (*token)->next;
-        ast->children = realloc(ast->children, (i+1) * sizeof(struct Node*));
+        ast->children = realloc(ast->children, (i + 1) * sizeof(struct Node *));
         ast->nb_children += 1;
         if (ast->children == NULL)
             goto error;
@@ -221,7 +223,7 @@ struct Node *parseSimpleCommand(struct Token **token)
             if (new_word == NULL)
                 return NULL;
             new_word->type = AST_SIMPLE_COMMAND;
-            new_word->children = calloc(2, sizeof(struct Node*));
+            new_word->children = calloc(2, sizeof(struct Node *));
             if (new_word->children == NULL)
             {
                 free(new_word);
@@ -232,18 +234,20 @@ struct Node *parseSimpleCommand(struct Token **token)
             new_word->nb_children = 2;
             res = new_word;
         }
-        // Si le noeud existe deja ajouter a ses enfants en agrandissant la liste
+        // Si le noeud existe deja ajouter a ses enfants en agrandissant la
+        // liste
         else
         {
             int i = 0;
             while (res->children[i] != NULL)
                 i++;
-            res->children = realloc(res->children, (i+2) * sizeof(struct Node*));
+            res->children =
+                realloc(res->children, (i + 2) * sizeof(struct Node *));
             if (res->children == NULL)
                 return NULL;
             res->children[i] = word;
             res->nb_children = i + 1;
-            res->children[i+1] = NULL;
+            res->children[i + 1] = NULL;
         }
     }
 

@@ -1,9 +1,10 @@
-#include "parser.h"
 #include "parser_rules.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "parser.h"
 
 // Parser les IFs
 struct Node *parseIf(struct Token **token)
@@ -17,7 +18,7 @@ struct Node *parseIf(struct Token **token)
     (*token) = (*token)->next;
 
     // Faire la condition
-    if_node->children = calloc(1, sizeof(struct Node*));
+    if_node->children = calloc(1, sizeof(struct Node *));
     if (if_node->children == NULL)
         goto error;
     if_node->children[0] = parseAndOr(token);
@@ -32,7 +33,7 @@ struct Node *parseIf(struct Token **token)
     (*token) = (*token)->next;
 
     // Faire le then
-    if_node->children = realloc(if_node->children, 2 * sizeof(struct Node*));
+    if_node->children = realloc(if_node->children, 2 * sizeof(struct Node *));
     if (if_node->children == NULL)
         goto error;
     if_node->children[1] = parseAndOr(token);
@@ -45,7 +46,8 @@ struct Node *parseIf(struct Token **token)
     {
         (*token) = (*token)->next;
 
-        if_node->children = realloc(if_node->children, 3 * sizeof(struct Node*));
+        if_node->children =
+            realloc(if_node->children, 3 * sizeof(struct Node *));
         if (if_node->children == NULL)
             goto error;
         if_node->children[2] = parseAndOr(token);
@@ -62,7 +64,7 @@ struct Node *parseIf(struct Token **token)
     return if_node;
 
 error:
-    //freeNode(if_node);
+    // freeNode(if_node);
     return NULL;
 }
 
@@ -101,7 +103,7 @@ struct Node *parseFor(struct Token **token)
         return NULL;
     ast->type = AST_FOR;
     ast->value = var;
-    ast->children = calloc(2, sizeof(struct Node*));
+    ast->children = calloc(2, sizeof(struct Node *));
     if (ast->children == NULL)
     {
         free(ast);
