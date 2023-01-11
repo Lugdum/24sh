@@ -4,6 +4,17 @@
 #include <string.h>
 #include <stdio.h>
 
+struct Token *process_end_of_file(struct Token *tok)
+{
+    struct Token *token  = calloc(1, sizeof(struct Token));
+    token->value = NULL;
+    token->next = NULL;
+    
+    token->type = EF;
+    
+    tok->next = token;
+    return token;
+}
 struct Token *process(char *str, struct Token *tok)
 {
     struct Token *token  = calloc(1, sizeof(struct Token));
@@ -11,7 +22,10 @@ struct Token *process(char *str, struct Token *tok)
     token->next = NULL;
     
     if (strlen(str) == 0)
-        token->type = EF;
+    {
+        free(token);
+        return tok;
+    }
     else if (!strcmp("if", str))
         token->type = IF;
     else if (!strcmp("then", str))
@@ -22,6 +36,8 @@ struct Token *process(char *str, struct Token *tok)
         token->type = ELSE;
     else if (!strcmp("fi", str))
         token->type = FI;
+    else if (!strcmp("|", str))
+        token->type = PIPE;
     else if (!strcmp(";", str))
         token->type = SC;
     else if (!strcmp("\n", str))
@@ -33,7 +49,10 @@ struct Token *process(char *str, struct Token *tok)
     else if (!strcmp("or", str))
         token->type = OR;
     else if (!strcmp(" ", str))
+    {
+        free(token);
         return tok;
+    }
     else
     {
         token->type = WORD;
@@ -76,7 +95,7 @@ struct Token *lexer(char *input)
     }
     cur[j] = '\0';
     cur_tok = process(cur, cur_tok);
-    cur_tok = process("\0", cur_tok);
+    cur_tok = process_end_of_file(cur_tok);
     
     return out->next;
 }
@@ -117,6 +136,9 @@ void print_token(struct Token *token) {
         case WORD:
             printf("%s ", token->value);
             break;
+        case PIPE:
+            printf("PIPE ");
+            break;
         case EF:
             printf("FIN");
             break;
@@ -134,5 +156,5 @@ int main(int argc, char *argv[])
     if (argc == 2)
         print_token(lexer(argv[1]));
     return 0;
-}*/
-
+}
+*/

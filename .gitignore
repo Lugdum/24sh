@@ -1,0 +1,5 @@
+*.o
+builddir/*
+.vscode
+graph
+graph.png

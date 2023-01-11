@@ -1,20 +1,26 @@
 [
   {
-    "directory": "/mnt/c/Users/titou/Documents/GitHub/24sh/builddir",
-    "command": "cc -I42sh@exe -I. -I.. -Isrc -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ '42sh@exe/src_lexer_lexer.c.o' -MF '42sh@exe/src_lexer_lexer.c.o.d' -o '42sh@exe/src_lexer_lexer.c.o' -c ../src/lexer/lexer.c",
+    "directory": "/home/victor/Epita/ING1/projets/24sh/builddir",
+    "command": "cc -I42sh.p -I. -I.. -Isrc -I../src -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ 42sh.p/src_lexer_lexer.c.o -MF 42sh.p/src_lexer_lexer.c.o.d -o 42sh.p/src_lexer_lexer.c.o -c ../src/lexer/lexer.c",
     "file": "../src/lexer/lexer.c",
-    "output": "42sh@exe/src_lexer_lexer.c.o"
+    "output": "42sh.p/src_lexer_lexer.c.o"
   },
   {
-    "directory": "/mnt/c/Users/titou/Documents/GitHub/24sh/builddir",
-    "command": "cc -I42sh@exe -I. -I.. -Isrc -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ '42sh@exe/src_parser_parser.c.o' -MF '42sh@exe/src_parser_parser.c.o.d' -o '42sh@exe/src_parser_parser.c.o' -c ../src/parser/parser.c",
+    "directory": "/home/victor/Epita/ING1/projets/24sh/builddir",
+    "command": "cc -I42sh.p -I. -I.. -Isrc -I../src -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ 42sh.p/src_parser_parser.c.o -MF 42sh.p/src_parser_parser.c.o.d -o 42sh.p/src_parser_parser.c.o -c ../src/parser/parser.c",
     "file": "../src/parser/parser.c",
-    "output": "42sh@exe/src_parser_parser.c.o"
+    "output": "42sh.p/src_parser_parser.c.o"
   },
   {
-    "directory": "/mnt/c/Users/titou/Documents/GitHub/24sh/builddir",
-    "command": "cc -I42sh@exe -I. -I.. -Isrc -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ '42sh@exe/src_42sh.c.o' -MF '42sh@exe/src_42sh.c.o.d' -o '42sh@exe/src_42sh.c.o' -c ../src/42sh.c",
+    "directory": "/home/victor/Epita/ING1/projets/24sh/builddir",
+    "command": "cc -I42sh.p -I. -I.. -Isrc -I../src -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ 42sh.p/src_exec_exec.c.o -MF 42sh.p/src_exec_exec.c.o.d -o 42sh.p/src_exec_exec.c.o -c ../src/exec/exec.c",
+    "file": "../src/exec/exec.c",
+    "output": "42sh.p/src_exec_exec.c.o"
+  },
+  {
+    "directory": "/home/victor/Epita/ING1/projets/24sh/builddir",
+    "command": "cc -I42sh.p -I. -I.. -Isrc -I../src -fdiagnostics-color=always -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -MD -MQ 42sh.p/src_42sh.c.o -MF 42sh.p/src_42sh.c.o.d -o 42sh.p/src_42sh.c.o -c ../src/42sh.c",
     "file": "../src/42sh.c",
-    "output": "42sh@exe/src_42sh.c.o"
+    "output": "42sh.p/src_42sh.c.o"
   }
 ]
