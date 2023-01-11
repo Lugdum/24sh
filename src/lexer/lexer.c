@@ -110,7 +110,9 @@ struct Token *lexer(char *input)
     cur_tok = process_end_of_file(cur_tok);
 
     free(cur);
-    return out->next;
+    cur_tok = out->next;
+    free(out);
+    return cur_tok;
 }
 
 void print_token(struct Token *token)
