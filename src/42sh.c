@@ -1,6 +1,7 @@
 #include "lexer/lexer.h"
 #include "parser/parser_print.h"
 #include "parser/parser.h"
+#include "parser/ast.h"
 #include "exec/exec.h"
 
 #include <fcntl.h>
@@ -49,6 +50,7 @@ char *file_to_char(char *file)
 
 int main(int argc, char **argv)
 {
+    int res = 1;
     /*printf("argv[0] : |%s\n", argv[0]);
     printf("argv[1] : |%s\n", argv[1]);
     printf("argv[2] : |%s\n", argv[2]);*/
@@ -58,7 +60,7 @@ int main(int argc, char **argv)
     {
         char *script = file_to_char(argv[1]);
         if (script == NULL)
-            return 1;
+            return res;
     }
 
     else if (argc >= 3 && !strcmp(argv[1], "-c"))
@@ -66,19 +68,22 @@ int main(int argc, char **argv)
         struct Token *tokens = lexer(argv[2]);
         /*printf("tokens:\n");
         print_token(tokens);*/
-        struct Node *root = parse(tokens);
+        struct Node *ast = NULL;
+        res = parse(tokens, &ast);
 
         // Print if asked in argument
         if (argc >= 4 && argv[3][0] == 't')
             print_token(tokens);
         if (argc >= 4 && (!strcmp(argv[3], "pp") || !strcmp(argv[3], "tpp")))
-            prettyprint(root, stdout);
+            prettyprint(ast, stdout);
         else if (argc >= 4 && (!strcmp(argv[3], "sp") || !strcmp(argv[3], "tsp")))
-            sexyprint(root);
+            sexyprint(ast);
         
-        node_type(root);
+        if (!res)
+            node_type(ast);
 
-        return 0;
+        free_lexer(tokens);
+        free_ast(ast);
     }
 
     else if ((strcmp(argv[1], "<") == 0))
@@ -97,5 +102,5 @@ int main(int argc, char **argv)
         dup2(dup_stdin, STDIN_FILENO);
         close(dup_stdin);
     }
-    return 0;
+    return res;
 }

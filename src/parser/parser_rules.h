@@ -4,9 +4,9 @@
 #include <stdio.h>
 
 #include "../lexer/lexer.h"
-#include "parser.h"
+#include "ast.h"
 
-struct Node *parseIf(struct Token **token);
-struct Node *parseFor(struct Token **token);
+int parseIf(struct Token **token, struct Node **if_node);
+int parseFor(struct Token **token, struct Node **ast);
 
 #endif /* !PARSER_RULES_H */
