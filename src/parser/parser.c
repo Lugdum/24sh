@@ -15,7 +15,7 @@ struct Node *parse(struct Token *token)
         return ast;
 
     // Parser
-    ast = parseList(&token, 0);
+    ast = parseList(&token);
 
     // On est bon
     if (token->type == EF || token->type == NL)
@@ -27,7 +27,7 @@ struct Node *parse(struct Token *token)
 }
 
 // Parser les listes
-struct Node *parseList(struct Token **token, int compound)
+struct Node *parseList(struct Token **token)
 {
     struct Node *ast = NULL;
     // Parser le premier élément de la liste
@@ -49,7 +49,7 @@ struct Node *parseList(struct Token **token, int compound)
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type == SC && (*token)->type != EF && ((*token)->type != NL || compound))
+    while (*token != NULL && (*token)->type == SC && (*token)->type != EF && ((*token)->type != NL))
     {
         // Skip ';'
         (*token) = (*token)->next;
@@ -109,6 +109,14 @@ struct Node *parseAndOr(struct Token **token)
     if (*token != NULL && (*token)->type == IF)
     {
         struct Node *if_node = parseIf(token);
+        if (if_node != NULL)
+            return if_node;
+    }
+    
+    // S'il y a un for le parser
+    if (*token != NULL && (*token)->type == FOR)
+    {
+        struct Node *if_node = parseFor(token);
         if (if_node != NULL)
             return if_node;
     }
@@ -262,129 +270,4 @@ struct Node *parseWord(struct Token **token)
     (*token) = (*token)->next;
 
     return word;
-}
-
-
-// Parser les IFs
-struct Node *parseIf(struct Token **token)
-{
-    // Creer le noeud if
-    struct Node *if_node = calloc(1, sizeof(struct Node));
-    if (if_node == NULL)
-        return NULL;
-    if_node->type = AST_IF;
-
-    (*token) = (*token)->next;
-
-    // Faire la condition
-    if_node->children = calloc(1, sizeof(struct Node*));
-    if (if_node->children == NULL)
-        goto error;
-    if_node->children[0] = parseList(token, 1);
-    if (if_node->children[0] == NULL)
-        goto error;
-    if_node->nb_children = 1;
-
-    // Verifier qu'il y a bien then
-    if ((*token) == NULL || (*token)->type != THEN)
-        goto error;
-
-    (*token) = (*token)->next;
-
-    // Faire le then
-    if_node->children = realloc(if_node->children, 2 * sizeof(struct Node*));
-    if (if_node->children == NULL)
-        goto error;
-    if_node->children[1] = parseList(token, 1);
-    if (if_node->children[1] == NULL)
-        goto error;
-    if_node->nb_children = 2;
-
-    // Faire le else s'il y en a un
-    if ((*token) != NULL && (*token)->type == ELSE)
-    {
-        (*token) = (*token)->next;
-
-        if_node->children = realloc(if_node->children, 3 * sizeof(struct Node*));
-        if (if_node->children == NULL)
-            goto error;
-        if_node->children[2] = parseList(token, 1);
-        if (if_node->children[2] == NULL)
-            goto error;
-        if_node->nb_children = 3;
-    }
-
-    // Verifier que le if termine par fi
-    if ((*token) == NULL || (*token)->type != FI)
-        goto error;
-
-    (*token) = (*token)->next;
-    return if_node;
-
-error:
-    //freeNode(if_node);
-    return NULL;
-}
-
-
-// ----------------------------------------------------------------
-// Print AST in dot
-void prettyprint(struct Node *ast, FILE *f) {
-    printf("AST:\n");
-    fprintf(f, "digraph ast {\n");
-    fprintf(f, "node [shape=box];\n");
-    print_node(ast, 0, f);
-    fprintf(f, "}\n");
-}
-
-void sexyprint(struct Node *ast) {
-    FILE *f = fopen("./graph", "w");
-    fprintf(f, "digraph ast {\n");
-    fprintf(f, "node [shape=box];\n");
-    print_node(ast, 0, f);
-    fprintf(f, "}\n");
-    fclose(f);
-}
-
-void print_node(struct Node *node, int parent, FILE *f) {
-    static int node_count = 1;
-    int current_node = node_count++;
-    switch (node->type) {
-        case AST_INPUT:
-            fprintf(f, "node%d [label=\"AST_INPUT\"];\n", current_node);
-            break;
-        case AST_AND_OR:
-            fprintf(f, "node%d [label=\"AND/OR\"];\n", current_node);
-            break;
-        case AST_LIST:
-            fprintf(f, "node%d [label=\"LIST\"];\n", current_node);
-            break;
-        case AST_PIPELINE:
-            fprintf(f, "node%d [label=\"PIPELINE\"];\n", current_node);
-            break;
-        case AST_COMMAND:
-            fprintf(f, "node%d [label=\"COMMAND\"];\n", current_node);
-            break;
-        case AST_SIMPLE_COMMAND:
-            fprintf(f, "node%d [label=\"SIMPLE_COMMAND\"];\n", current_node);
-            break;
-        case AST_ELEMENT:
-            fprintf(f, "node%d [label=\"%s\"];\n", current_node, node->value);
-            break;
-        case AST_CMD:
-            fprintf(f, "node%d [label=\"CMD\"];\n", current_node);
-            break;
-        case AST_IF:
-            fprintf(f, "node%d [label=\"IF\"];\n", current_node);
-            break;
-        default:
-            fprintf(f, "node%d [label=\"UNKNOWN\"];\n", current_node);
-            break;
-    }
-    if (parent != 0) {
-        fprintf(f, "node%d -> node%d;\n", parent, current_node);
-    }
-    for (int i = 0; i < node->nb_children; i++) {
-        print_node(node->children[i], current_node, f);
-    }
 }
