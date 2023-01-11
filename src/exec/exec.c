@@ -33,10 +33,14 @@ int process_if(struct Node *ast)
 
 int process_cmd(struct Node *ast)
 {
-    if (ast->children[0]->type == AST_SIMPLE_COMMAND)
-        return node_type(ast->children[0]);
-    else
-        return exec_command(ast);
+    for (int i = 0; i < ast->nb_children; i++)
+    {
+        if (ast->children[i]->type == AST_SIMPLE_COMMAND)
+            node_type(ast->children[i]);
+        else
+            return exec_command(ast);
+    }
+    return 1;
 }
 
 int process_list(struct Node *ast)
