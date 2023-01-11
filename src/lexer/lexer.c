@@ -15,6 +15,7 @@ struct Token *process_end_of_file(struct Token *tok)
     tok->next = token;
     return token;
 }
+
 struct Token *process(char *str, struct Token *tok)
 {
     struct Token *token = calloc(1, sizeof(struct Token));
@@ -66,7 +67,10 @@ struct Token *process(char *str, struct Token *tok)
         token->type = WORD;
         token->value = calloc(strlen(str) + 1, sizeof(char));
         if (!token->value)
+        {
+            free(token);
             return NULL;
+        }
         strcpy(token->value, str);
     }
     tok->next = token;
@@ -105,6 +109,7 @@ struct Token *lexer(char *input)
     cur_tok = process(cur, cur_tok);
     cur_tok = process_end_of_file(cur_tok);
 
+    free(cur);
     return out->next;
 }
 
@@ -173,6 +178,19 @@ void print_token(struct Token *token)
     }
     printf("\n");
 }
+
+void free_lexer(struct Token *token)
+{
+    while (token != NULL)
+    {
+        struct Token *next = token->next;
+        free(token->value);
+        free(token);
+        token = next;
+    }
+}
+
+
 /*
 int main(int argc, char *argv[])
 {

@@ -30,6 +30,7 @@ struct Token
 };
 
 struct Token *lexer(char *arg);
+void free_lexer(struct Token *token);
 
 void print_token(struct Token *token);
 
