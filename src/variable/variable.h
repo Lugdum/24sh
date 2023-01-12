@@ -1,4 +1,5 @@
-
+#ifndef VARIABLE_H
+#define VARIABLE_H
 
 struct variable_list
 {
@@ -16,3 +17,5 @@ char *find_value(struct variable_list *list, char *name);
 void insert_value(struct variable_list *list, char *name, char *value);
 void modify_value(struct variable_list *list, char *name, char *value);
 void free_list(struct variable_list *list);
+
+#endif /* !VARIABLE_H */
