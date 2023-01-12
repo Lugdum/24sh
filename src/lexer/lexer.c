@@ -57,6 +57,10 @@ struct Token *process(char *str, struct Token *tok)
         token->type = DO;
     else if (!strcmp("done", str))
         token->type = DONE;
+    else if (!strcmp("while", str))
+        token->type = WHILE;
+    else if (!strcmp("util", str))
+        token->type = UNTIL;
     else if (!strcmp(" ", str))
     {
         free(token);
