@@ -1,0 +1,5 @@
+if true && false && true
+    then echo WIN
+    else if false && true && false
+    then echo WIN
+fi fi

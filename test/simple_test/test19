@@ -1,0 +1,4 @@
+if false || false
+    then echo LOOSE
+    else echo WIN
+fi

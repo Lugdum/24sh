@@ -1,0 +1,4 @@
+if true
+then echo simple if
+else echo LOOSE
+fi
