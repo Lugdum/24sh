@@ -78,7 +78,9 @@ error:
 int parseAndOr(struct Token **token, struct Node **ast)
 {
     // Parser le premier élément de AND_OR
-    int res = parsePipeline(token, ast);
+    int res;
+    if ((*token)->type == WORD)
+        res = parsePipeline(token, ast);
 
     if (*token == NULL)
         return res;
@@ -89,6 +91,8 @@ int parseAndOr(struct Token **token, struct Node **ast)
         // Skip 'AND' ou 'OR'
         enum TokenType op = (*token)->type;
         (*token) = (*token)->next;
+        if ((*token)->type == SC || (*token)->type == NL)
+            (*token) = (*token)->next;
         struct Node *right = NULL;
         parsePipeline(token, &right);
 
@@ -156,6 +160,8 @@ int parsePipeline(struct Token **token, struct Node **ast)
     {
         // Skip '|'
         (*token) = (*token)->next;
+        if ((*token)->type == SC || (*token)->type == NL)
+            (*token) = (*token)->next;
         struct Node *right = NULL;
         parseCommand(token, &right);
 
@@ -202,6 +208,8 @@ int parseCommand(struct Token **token, struct Node **ast)
     while (*token != NULL && (*token)->type > SC)
     {
         (*token) = (*token)->next;
+        if ((*token)->type == SC || (*token)->type == NL)
+            (*token) = (*token)->next;
         (*ast)->children = realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
         if ((*ast)->children == NULL)
             goto error;
@@ -236,7 +244,7 @@ int parseSimpleCommand(struct Token **token, struct Node **ast)
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL)
+    while (*token && (*token)->type == WORD)
     {
         (*ast)->children =
             realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
@@ -267,6 +275,8 @@ struct Node *parseWord(struct Token **token)
     word->value = calloc(strlen((*token)->value) + 1, sizeof(char));
     strcpy(word->value,((*token)->value));
     (*token) = (*token)->next;
+        if ((*token)->type == SC || (*token)->type == NL)
+            (*token) = (*token)->next;
 
     return word;
 }

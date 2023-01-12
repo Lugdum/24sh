@@ -139,6 +139,8 @@ int parseWhile(struct Token **token, struct Node **ast)
     (*ast)->type = AST_WHILE;
 
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
 
     // La condition
     (*ast)->children = calloc(1, sizeof(struct Node *));
@@ -146,11 +148,11 @@ int parseWhile(struct Token **token, struct Node **ast)
         goto error;
     (*ast)->nb_children = 1;
 
-    if ((*token)->type == SC || (*token)->type == NL)
-        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != DO)
         goto error;
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
 
     // Faire le do
     (*ast)->children = realloc((*ast)->children, 2 * sizeof(struct Node *));
@@ -162,12 +164,12 @@ int parseWhile(struct Token **token, struct Node **ast)
         goto error;
     (*ast)->nb_children = 2;
 
-    if ((*token)->type == SC || (*token)->type == NL)
-        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != DONE)
         goto error;
 
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     return 0;
 
 error:
@@ -184,6 +186,8 @@ int parseUntil(struct Token **token, struct Node **ast)
     (*ast)->type = AST_UNTIL;
 
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
 
     // La condition
     (*ast)->children = calloc(1, sizeof(struct Node *));
@@ -191,12 +195,12 @@ int parseUntil(struct Token **token, struct Node **ast)
         goto error;
     (*ast)->nb_children = 1;
 
-    if ((*token)->type == SC || (*token)->type == NL)
-        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != DO)
         goto error;
 
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
 
     // Faire le do
     (*ast)->children = realloc((*ast)->children, 2 * sizeof(struct Node *));
@@ -208,12 +212,12 @@ int parseUntil(struct Token **token, struct Node **ast)
         goto error;
     (*ast)->nb_children = 2;
 
-    if ((*token)->type == SC || (*token)->type == NL)
-        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != DONE)
         goto error;
 
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     return 0;
 
 error:

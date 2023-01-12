@@ -59,7 +59,7 @@ struct Token *process(char *str, struct Token *tok)
         token->type = DONE;
     else if (!strcmp("while", str))
         token->type = WHILE;
-    else if (!strcmp("util", str))
+    else if (!strcmp("until", str))
         token->type = UNTIL;
     else if (!strcmp(" ", str))
     {
@@ -148,6 +148,12 @@ void print_token(struct Token *token)
             break;
         case FOR:
             printf("FOR ");
+            break;
+        case UNTIL:
+            printf("UNTIL ");
+            break;
+        case WHILE:
+            printf("WHILE ");
             break;
         case IN:
             printf("IN ");
