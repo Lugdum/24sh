@@ -19,10 +19,7 @@ int parseIf(struct Token **token, struct Node **if_node)
 
     // Faire la condition
     (*if_node)->children = calloc(1, sizeof(struct Node *));
-    if ((*if_node)->children == NULL)
-        goto error;
-    parseAndOr(token, &(*if_node)->children[0]);
-    if ((*if_node)->children[0] == NULL)
+    if ((*if_node)->children == NULL || parseAndOr(token, &(*if_node)->children[0]) || (*if_node)->children[0] == NULL)
         goto error;
     (*if_node)->nb_children = 1;
 
@@ -36,7 +33,8 @@ int parseIf(struct Token **token, struct Node **if_node)
     (*if_node)->children = realloc((*if_node)->children, 2 * sizeof(struct Node *));
     if ((*if_node)->children == NULL)
         goto error;
-    parseAndOr(token, &(*if_node)->children[1]);
+    if (parseAndOr(token, &(*if_node)->children[1]))
+        goto error;
     if ((*if_node)->children[1] == NULL)
         goto error;
     (*if_node)->nb_children = 2;
@@ -50,7 +48,8 @@ int parseIf(struct Token **token, struct Node **if_node)
             realloc((*if_node)->children, 3 * sizeof(struct Node *));
         if ((*if_node)->children == NULL)
             goto error;
-        parseAndOr(token, &(*if_node)->children[2]);
+        if (parseAndOr(token, &(*if_node)->children[2]))
+            goto error;
         if ((*if_node)->children[2] == NULL)
             goto error;
         (*if_node)->nb_children = 3;
@@ -85,7 +84,8 @@ int parseFor(struct Token **token, struct Node **ast)
 
     // La condition
     struct Node *cond = NULL;
-    parseAndOr(token, &cond);
+    if (parseAndOr(token, &cond))
+        goto error;
 
     if (*token == NULL || (*token)->type != DO)
         return 2;
@@ -93,10 +93,11 @@ int parseFor(struct Token **token, struct Node **ast)
 
     // La boucle
     struct Node *loop = NULL;
-    parseAndOr(token, &loop);
+    if (parseList(token, &loop))
+        goto error;
 
     if (*token == NULL || (*token)->type != DONE)
-        return 2;
+        goto error;
     (*token) = (*token)->next;
 
     // Faire le if
@@ -107,13 +108,13 @@ int parseFor(struct Token **token, struct Node **ast)
     (*ast)->value = var;
     (*ast)->children = calloc(2, sizeof(struct Node *));
     if ((*ast)->children == NULL)
-    {
-        free_ast(*ast);
-        return 2;
-    }
+        goto error;
     (*ast)->children[0] = cond;
     (*ast)->children[1] = loop;
     (*ast)->nb_children = 2;
 
     return 0;
+error:
+    free_ast(*ast);
+    return 2;
 }

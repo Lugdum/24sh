@@ -27,6 +27,8 @@ int parseList(struct Token **token, struct Node **ast)
 {
     // Parser le premier élément de la liste
     int res = parseAndOr(token, ast);
+    if (res)
+        return res;
 
     if (*token == NULL)
         return 0;
@@ -168,9 +170,10 @@ int parseCommand(struct Token **token, struct Node **ast)
     (*ast)->type = AST_COMMAND;
     if ((*ast)->children == NULL)
         goto error;
-    parseSimpleCommand(token, &(*ast)->children[0]);
+    if (parseSimpleCommand(token, &(*ast)->children[0]))
+        goto error;
     if (!(*ast)->children[0])
-        return 2;
+        goto error;
     (*ast)->nb_children = 1;
 
     // S'il y a plusieurs trucs
@@ -179,10 +182,11 @@ int parseCommand(struct Token **token, struct Node **ast)
     {
         (*token) = (*token)->next;
         (*ast)->children = realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
-        (*ast)->nb_children += 1;
         if ((*ast)->children == NULL)
             goto error;
-        parseSimpleCommand(token, &(*ast)->children[i]);
+        if (parseSimpleCommand(token, &(*ast)->children[i]))
+            goto error;
+        (*ast)->nb_children += 1;
 
         i++;
     }
@@ -190,7 +194,7 @@ int parseCommand(struct Token **token, struct Node **ast)
     return 0;
 
 error:
-    free(ast);
+    free_ast(*ast);
     return 2;
 }
 
