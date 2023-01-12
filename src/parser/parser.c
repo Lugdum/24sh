@@ -51,6 +51,8 @@ int parseList(struct Token **token, struct Node **ast)
     {
         // Skip ';'
         (*token) = (*token)->next;
+        if ((*token)->type == EF)
+            break;
         parseAndOr(token, ast);
         list->children =
             realloc(list->children, (i + 1) * sizeof(struct Node *));
