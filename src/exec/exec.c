@@ -65,9 +65,6 @@ int node_type(struct Node *ast)
         return process_cmd(ast);
     case AST_LIST:
         return process_list(ast);
-    case AST_AND_OR:
-        // TODO
-        break;
     case AST_PIPELINE:
         // TODO
         break;
