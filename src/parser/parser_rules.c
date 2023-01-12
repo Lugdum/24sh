@@ -24,6 +24,8 @@ int parseIf(struct Token **token, struct Node **if_node)
     (*if_node)->nb_children = 1;
 
     // Verifier qu'il y a bien then
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != THEN)
         goto error;
 
@@ -40,6 +42,8 @@ int parseIf(struct Token **token, struct Node **if_node)
     (*if_node)->nb_children = 2;
 
     // Faire le else s'il y en a un
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) != NULL && (*token)->type == ELSE)
     {
         (*token) = (*token)->next;
@@ -56,6 +60,8 @@ int parseIf(struct Token **token, struct Node **if_node)
     }
 
     // Verifier que le if termine par fi
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != FI)
         goto error;
 
