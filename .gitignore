@@ -4,3 +4,4 @@ builddir/*
 .vscode
 graph
 graph.png
+*.swp

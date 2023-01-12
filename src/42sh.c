@@ -75,11 +75,11 @@ int main(int argc, char **argv)
         }
 
         // Print if asked in argument
-        if (argc >= 4 && argv[argc+1][0] == 't')
+        if (argc >= 4 && argv[argc-1][0] == 't')
             print_token(tokens);
-        if (argc >= 4 && (!strcmp(argv[argc+1], "pp") || !strcmp(argv[argc+1], "tpp")))
+        if (argc >= 4 && (!strcmp(argv[argc-1], "pp") || !strcmp(argv[argc-1], "tpp")))
             prettyprint(ast, stdout);
-        else if (argc >= 4 && (!strcmp(argv[argc+1], "sp") || !strcmp(argv[argc+1], "tsp")))
+        else if (argc >= 4 && (!strcmp(argv[argc-1], "sp") || !strcmp(argv[argc-1], "tsp")))
             sexyprint(ast);
         
         if (!res)

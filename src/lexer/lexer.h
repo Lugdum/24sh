@@ -12,12 +12,12 @@ enum TokenType
     IN,
     DO,
     DONE,
+    AND,
+    OR,
     SC,
     EF,
     NL,
     SQ,
-    AND,
-    OR,
     PIPE,
     WORD
 };
