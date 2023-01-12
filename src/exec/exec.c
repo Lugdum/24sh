@@ -57,6 +57,16 @@ int process_pipe(struct Node *ast)
     return node_type(ast->children[1]);
 }
 
+int process_and(struct Node *ast)
+{
+    return node_type(ast->children[0]) && node_type(ast->children[0]);
+}
+
+int process_or(struct Node *ast)
+{
+    return node_type(ast->children[0]) || node_type(ast->children[0]);
+}
+
 int node_type(struct Node *ast)
 {
     switch (ast->type)
