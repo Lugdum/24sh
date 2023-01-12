@@ -45,9 +45,9 @@ struct Token *process(char *str, struct Token *tok)
         token->type = NL;
     else if (!strcmp("'", str))
         token->type = SQ;
-    else if (!strcmp("and", str))
+    else if (!strcmp("&&", str))
         token->type = AND;
-    else if (!strcmp("or", str))
+    else if (!strcmp("||", str))
         token->type = OR;
     else if (!strcmp("for", str))
         token->type = FOR;
