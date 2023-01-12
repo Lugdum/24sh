@@ -23,6 +23,8 @@ void insert_value(struct variable_list *list, char *name, char *value)
 }
 void modify_value(struct variable_list *list, char *name, char *value)
 {
+    if (find_value(list, name) != NULL)
+    {
     for (int i = 0; i < list->size; i++)
     {
         if (!strcmp(name, list->list[i]->name))
@@ -30,6 +32,11 @@ void modify_value(struct variable_list *list, char *name, char *value)
             list->list[i]->value = realloc(strlen(value) + 1);
             list->list[i]->value = strcpy(list->list[i]->value, value);
         }
+    }
+    }
+    else
+    {
+        insert_value(list, name, value);
     }
 }
 void free_list(struct variable_list *list)
