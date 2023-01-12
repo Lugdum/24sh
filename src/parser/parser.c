@@ -252,7 +252,8 @@ struct Node *parseWord(struct Token **token)
         return NULL;
     word->type = AST_ELEMENT;
     word->nb_children = 0;
-    word->value = strdup((*token)->value);
+    word->value = calloc(strlen((*token)->value) + 1, sizeof(char));
+    strcpy(word->value,((*token)->value));
     if (word->value == NULL)
     {
         free(word);
