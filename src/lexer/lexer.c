@@ -85,7 +85,7 @@ struct Token *lexer(char *input)
     struct Token *cur_tok = out;
 
     int len = strlen(input);
-    char *cur = malloc(len);
+    char *cur = calloc(len + 1, 1);
     int j = 0;
     for (int i = 0; i < len; i++)
     {
@@ -110,7 +110,9 @@ struct Token *lexer(char *input)
     cur_tok = process_end_of_file(cur_tok);
 
     free(cur);
-    return out->next;
+    cur_tok = out->next;
+    free(out);
+    return cur_tok;
 }
 
 void print_token(struct Token *token)

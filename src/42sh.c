@@ -70,6 +70,11 @@ int main(int argc, char **argv)
         print_token(tokens);*/
         struct Node *ast = NULL;
         res = parse(tokens, &ast);
+        if (res)
+        {
+            free_lexer(tokens);
+            return res;
+        }
 
         // Print if asked in argument
         if (argc >= 4 && argv[3][0] == 't')

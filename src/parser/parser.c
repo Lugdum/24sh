@@ -27,6 +27,8 @@ int parseList(struct Token **token, struct Node **ast)
 {
     // Parser le premier élément de la liste
     int res = parseAndOr(token, ast);
+    if (res)
+        return res;
 
     if (*token == NULL)
         return 0;
@@ -168,21 +170,23 @@ int parseCommand(struct Token **token, struct Node **ast)
     (*ast)->type = AST_COMMAND;
     if ((*ast)->children == NULL)
         goto error;
-    parseSimpleCommand(token, &(*ast)->children[0]);
+    if (parseSimpleCommand(token, &(*ast)->children[0]))
+        goto error;
     if (!(*ast)->children[0])
-        return 2;
+        goto error;
     (*ast)->nb_children = 1;
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type >= SC && (*token)->type != EF)
+    while (*token != NULL && (*token)->type > SC && (*token)->type != EF)
     {
         (*token) = (*token)->next;
         (*ast)->children = realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
-        (*ast)->nb_children += 1;
         if ((*ast)->children == NULL)
             goto error;
-        parseSimpleCommand(token, &(*ast)->children[i]);
+        if (parseSimpleCommand(token, &(*ast)->children[i]))
+            goto error;
+        (*ast)->nb_children += 1;
 
         i++;
     }
@@ -190,60 +194,46 @@ int parseCommand(struct Token **token, struct Node **ast)
     return 0;
 
 error:
-    free(ast);
+    free_ast(*ast);
     return 2;
 }
 
 // Parser les commandes simples
 int parseSimpleCommand(struct Token **token, struct Node **ast)
 {
-    // Parser le premier élément de la SIMPLE_COMMAND
-    *ast = parseWord(token);
+    *ast = calloc(1, sizeof(struct Node));
+    if (*ast == NULL)
+        return 2;
 
-    if (*token == NULL)
-        return 0;
+    // Parser le premier element de la commande
+    (*ast)->children = calloc(1, sizeof(struct Node *));
+    (*ast)->type = AST_SIMPLE_COMMAND;
+    if ((*ast)->children == NULL)
+        goto error;
+    (*ast)->children[0] = parseWord(token);
+    if (!(*ast)->children[0])
+        goto error;
+    (*ast)->nb_children = 1;
 
     // S'il y a plusieurs trucs
+    int i = 1;
     while (*token != NULL && (*token)->type == WORD)
     {
+        (*ast)->children =
+            realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
+        if ((*ast)->children == NULL)
+            return 1;
         struct Node *word = parseWord(token);
-
-        // Creer le noeud WORD et les ajouter en enfants
-        if (!(*ast)->nb_children)
-        {
-            struct Node *new_word = calloc(1, sizeof(struct Node));
-            if (new_word == NULL)
-                return 1;
-            new_word->type = AST_SIMPLE_COMMAND;
-            new_word->children = calloc(2, sizeof(struct Node *));
-            if (new_word->children == NULL)
-            {
-                free(new_word);
-                return 1;
-            }
-            new_word->children[0] = *ast;
-            new_word->children[1] = word;
-            new_word->nb_children = 2;
-            *ast = new_word;
-        }
-        // Si le noeud existe deja ajouter a ses enfants en agrandissant la
-        // liste
-        else
-        {
-            int i = 0;
-            while ((*ast)->children[i] != NULL)
-                i++;
-            (*ast)->children =
-                realloc((*ast)->children, (i + 2) * sizeof(struct Node *));
-            if ((*ast)->children == NULL)
-                return 1;
-            (*ast)->children[i] = word;
-            (*ast)->nb_children = i + 1;
-            (*ast)->children[i + 1] = NULL;
-        }
+        (*ast)->children[i] = word;
+        (*ast)->nb_children += 1;
+        i++;
     }
 
     return 0;
+
+error:
+    free_ast(*ast);
+    return 2;
 }
 
 // Parser les mots

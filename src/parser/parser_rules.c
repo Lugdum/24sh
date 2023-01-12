@@ -19,14 +19,13 @@ int parseIf(struct Token **token, struct Node **if_node)
 
     // Faire la condition
     (*if_node)->children = calloc(1, sizeof(struct Node *));
-    if ((*if_node)->children == NULL)
-        goto error;
-    parseAndOr(token, &(*if_node)->children[0]);
-    if ((*if_node)->children[0] == NULL)
+    if ((*if_node)->children == NULL || parseAndOr(token, &(*if_node)->children[0]) || (*if_node)->children[0] == NULL)
         goto error;
     (*if_node)->nb_children = 1;
 
     // Verifier qu'il y a bien then
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != THEN)
         goto error;
 
@@ -36,12 +35,15 @@ int parseIf(struct Token **token, struct Node **if_node)
     (*if_node)->children = realloc((*if_node)->children, 2 * sizeof(struct Node *));
     if ((*if_node)->children == NULL)
         goto error;
-    parseAndOr(token, &(*if_node)->children[1]);
+    if (parseAndOr(token, &(*if_node)->children[1]))
+        goto error;
     if ((*if_node)->children[1] == NULL)
         goto error;
     (*if_node)->nb_children = 2;
 
     // Faire le else s'il y en a un
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) != NULL && (*token)->type == ELSE)
     {
         (*token) = (*token)->next;
@@ -50,13 +52,16 @@ int parseIf(struct Token **token, struct Node **if_node)
             realloc((*if_node)->children, 3 * sizeof(struct Node *));
         if ((*if_node)->children == NULL)
             goto error;
-        parseAndOr(token, &(*if_node)->children[2]);
+        if (parseAndOr(token, &(*if_node)->children[2]))
+            goto error;
         if ((*if_node)->children[2] == NULL)
             goto error;
         (*if_node)->nb_children = 3;
     }
 
     // Verifier que le if termine par fi
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != FI)
         goto error;
 
@@ -64,7 +69,7 @@ int parseIf(struct Token **token, struct Node **if_node)
     return 0;
 
 error:
-    // freeNode(if_node);
+    free_ast(*if_node);
     return 2;
 }
 
@@ -85,18 +90,22 @@ int parseFor(struct Token **token, struct Node **ast)
 
     // La condition
     struct Node *cond = NULL;
-    parseAndOr(token, &cond);
+    if (parseAndOr(token, &cond))
+        goto error;
 
+    if ((*token)->type == SC)
+        (*token) = (*token)->next;
     if (*token == NULL || (*token)->type != DO)
         return 2;
     (*token) = (*token)->next;
 
     // La boucle
     struct Node *loop = NULL;
-    parseAndOr(token, &loop);
+    if (parseList(token, &loop))
+        goto error;
 
     if (*token == NULL || (*token)->type != DONE)
-        return 2;
+        goto error;
     (*token) = (*token)->next;
 
     // Faire le if
@@ -107,13 +116,13 @@ int parseFor(struct Token **token, struct Node **ast)
     (*ast)->value = var;
     (*ast)->children = calloc(2, sizeof(struct Node *));
     if ((*ast)->children == NULL)
-    {
-        free(ast);
-        return 2;
-    }
+        goto error;
     (*ast)->children[0] = cond;
     (*ast)->children[1] = loop;
     (*ast)->nb_children = 2;
 
     return 0;
+error:
+    free_ast(*ast);
+    return 2;
 }
