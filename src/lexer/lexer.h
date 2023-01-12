@@ -9,6 +9,8 @@ enum TokenType
     ELSE,
     FI,
     FOR,
+    WHILE,
+    UNTIL,
     IN,
     DO,
     DONE,

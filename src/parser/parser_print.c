@@ -65,6 +65,12 @@ void print_node(struct Node *node, int parent, FILE *f)
     case AST_FOR:
         fprintf(f, "node%d [label=\"FOR\"];\n", current_node);
         break;
+    case AST_WHILE:
+        fprintf(f, "node%d [label=\"WHILE\"];\n", current_node);
+        break;
+    case AST_UNTIL:
+        fprintf(f, "node%d [label=\"UNTIL\"];\n", current_node);
+        break;
     default:
         fprintf(f, "node%d [label=\"UNKNOWN\"];\n", current_node);
         break;

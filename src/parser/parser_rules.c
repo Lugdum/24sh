@@ -129,3 +129,98 @@ error:
     free_ast(*ast);
     return 2;
 }
+
+// Parser le while
+int parseWhile(struct Token **token, struct Node **ast)
+{
+    *ast = calloc(1, sizeof(struct Node));
+    if (ast == NULL)
+        return 1;
+    (*ast)->type = AST_WHILE;
+
+    (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
+
+    // La condition
+    (*ast)->children = calloc(1, sizeof(struct Node *));
+    if ((*ast)->children == NULL || parseAndOr(token, &(*ast)->children[0]) || (*ast)->children[0] == NULL)
+        goto error;
+    (*ast)->nb_children = 1;
+
+    if ((*token) == NULL || (*token)->type != DO)
+        goto error;
+    (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
+
+    // Faire le do
+    (*ast)->children = realloc((*ast)->children, 2 * sizeof(struct Node *));
+    if ((*ast)->children == NULL)
+        goto error;
+    if (parseAndOr(token, &(*ast)->children[1]))
+        goto error;
+    if ((*ast)->children[1] == NULL)
+        goto error;
+    (*ast)->nb_children = 2;
+
+    if ((*token) == NULL || (*token)->type != DONE)
+        goto error;
+
+    (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
+    return 0;
+
+error:
+    free_ast(*ast);
+    return 2;
+}
+
+// Parser le until
+int parseUntil(struct Token **token, struct Node **ast)
+{
+    *ast = calloc(1, sizeof(struct Node));
+    if (ast == NULL)
+        return 1;
+    (*ast)->type = AST_UNTIL;
+
+    (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
+
+    // La condition
+    (*ast)->children = calloc(1, sizeof(struct Node *));
+    if ((*ast)->children == NULL || parseAndOr(token, &(*ast)->children[0]) || (*ast)->children[0] == NULL)
+        goto error;
+    (*ast)->nb_children = 1;
+
+    if ((*token) == NULL || (*token)->type != DO)
+        goto error;
+
+    (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
+
+    // Faire le do
+    (*ast)->children = realloc((*ast)->children, 2 * sizeof(struct Node *));
+    if ((*ast)->children == NULL)
+        goto error;
+    if (parseAndOr(token, &(*ast)->children[1]))
+        goto error;
+    if ((*ast)->children[1] == NULL)
+        goto error;
+    (*ast)->nb_children = 2;
+
+    if ((*token) == NULL || (*token)->type != DONE)
+        goto error;
+
+    (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
+    return 0;
+
+error:
+    free_ast(*ast);
+    return 2;
+}
