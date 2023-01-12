@@ -5,7 +5,8 @@ enum ast_type
 {
     AST_INPUT,
     AST_LIST,
-    AST_AND_OR,
+    AST_AND,
+    AST_OR,
     AST_PIPELINE,
     AST_COMMAND,
     AST_SIMPLE_COMMAND,
