@@ -83,7 +83,7 @@ int main(int argc, char **argv)
             sexyprint(ast);
         
         if (!res)
-            node_type(ast);
+            main_exec(ast);
 
         free_lexer(tokens);
         free_ast(ast);

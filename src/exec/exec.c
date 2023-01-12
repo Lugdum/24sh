@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "echo.h"
 
 struct variable_list *list;
 
@@ -49,32 +48,45 @@ int process_for(struct Node *ast)
         else
         {
             char *end;
-            if (tmp->nb_children <= i + 2)
+            if (tmp->nb_children <= i + 1)
             {
                 //last char ..
                 fprintf( stderr, "invalid for loop condition");
                 return 2;
             }
-            long begin = strtol(tmp->children[i - 1]->value, &end, 10);
-            if (strcmp(tmp->children[i]->value, end))
+            long int_begin = strtol(tmp->children[i - 1]->value, &end, 10);
+            if (!strcmp(tmp->children[i]->value, end))
             {
                 //letter in nuber
-                fprintf( stderr, "invalid chars in for loop condition");
+                fprintf( stderr, "invalid chars in for loop condition begin\n");
                 return 2;
             }
-            long end = strtol(tmp->children[i - 1]->value, &end, 10);
-            if (strcmp(tmp->children[i]->value, end))
+            long int_end = strtol(tmp->children[i + 1]->value, &end, 10);
+            if (!strcmp(tmp->children[i]->value, end))
             {
                 //letter in nuber
-                fprintf( stderr, "invalid chars in for loop condition");
+                fprintf( stderr, "invalid chars in for loop condition end\n");
                 return 2;
             }
-            for (; begin < end; begin ++)
+            if (int_begin < int_end)
+            {
+            for (; int_begin + 1 < int_end; int_begin ++)
             {
                 char *buffer = calloc(101, 1);
-                sprintf(buffer, "%ld", begin);
+                sprintf(buffer, "%ld", int_begin);
                 modify_value(list, ast->value, buffer);
                 r = node_type(ast->children[1]);
+            }
+            }
+            else
+            {
+            for (; int_begin - 1 < int_end; int_begin --)
+            {
+                char *buffer = calloc(101, 1);
+                sprintf(buffer, "%ld", int_begin);
+                modify_value(list, ast->value, buffer);
+                r = node_type(ast->children[1]);
+            }
             }
         }
     }
@@ -181,5 +193,5 @@ int main_exec(struct Node *ast)
     list = calloc(1, sizeof(struct variable_list));
     list->size = 0;
     list->list = NULL;
-    node_type(ast);
+    return node_type(ast);
 }
