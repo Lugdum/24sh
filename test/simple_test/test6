@@ -1,0 +1,11 @@
+if true
+then echo simple
+else echo LOOSE
+fi
+
+if false
+then if true
+then echo a
+fi 
+else echo WIN; 
+fi

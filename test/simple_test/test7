@@ -1,0 +1,7 @@
+if true
+    then if true
+        then echo WIN
+    else echo LOOSE
+    fi
+    else echo LOOSE
+fi

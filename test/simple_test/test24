@@ -1,0 +1,3 @@
+if true && true
+    then echo WIN
+fi

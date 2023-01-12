@@ -1,0 +1,30 @@
+- exitcode: 0 
+  file: simple_test/echo.in 
+  stderr: false 
+  stdout: 'toto 
+
+    '
+- exitcode: 0
+  file: simple_test/bip.in 
+  stderr: false 
+  stdout: 'bip bop bup
+
+    '
+- exitcode: 0 
+  file: simple_test/ls.in 
+  stderr: false 
+  stdout: 'a.out
+
+    create_test.py 
+    
+    pre_test_suite.py 
+    
+    result simple_test 
+    
+    t.c 
+    
+    test_suite.py
+    
+    test_suite.sh
+
+    '
