@@ -81,7 +81,8 @@ int parseFor(struct Token **token, struct Node **ast)
     // Variable du for
     if (*token == NULL || (*token)->type != WORD)
         return 2;
-    char *var = (*token)->value;
+    char *var = calloc(1, sizeof(char) * strlen((*token)->value) + 1);
+    var = strcpy(var, (*token)->value);
     (*token) = (*token)->next;
 
     if (*token == NULL || (*token)->type != IN)
@@ -93,11 +94,13 @@ int parseFor(struct Token **token, struct Node **ast)
     if (parseAndOr(token, &cond))
         goto error;
 
-    if ((*token)->type == SC)
+    if ((*token)->type == SC || (*token)->type == NL)
         (*token) = (*token)->next;
     if (*token == NULL || (*token)->type != DO)
         return 2;
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
 
     // La boucle
     struct Node *loop = NULL;

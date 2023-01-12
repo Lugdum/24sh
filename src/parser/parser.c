@@ -51,7 +51,7 @@ int parseList(struct Token **token, struct Node **ast)
     {
         // Skip ';'
         (*token) = (*token)->next;
-        if ((*token)->type == EF)
+        if ((*token)->type == EF || (*token)->type == DONE)
             break;
         parseAndOr(token, ast);
         list->children =
