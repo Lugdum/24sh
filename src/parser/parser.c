@@ -95,7 +95,10 @@ int parseAndOr(struct Token **token, struct Node **ast)
         struct Node *and_or = calloc(1, sizeof(struct Node));
         if (and_or == NULL)
             return 1;
-        and_or->type = op;
+        if (op == AND)
+            and_or->type = AST_AND;
+        else
+            and_or->type = AST_OR;
         and_or->children = calloc(2, sizeof(struct Node *));
         if (and_or->children == NULL)
         {
