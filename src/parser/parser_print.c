@@ -35,8 +35,11 @@ void print_node(struct Node *node, int parent, FILE *f)
     case AST_INPUT:
         fprintf(f, "node%d [label=\"AST_INPUT\"];\n", current_node);
         break;
-    case AST_AND_OR:
-        fprintf(f, "node%d [label=\"AND/OR\"];\n", current_node);
+    case AST_OR:
+        fprintf(f, "node%d [label=\"OR\"];\n", current_node);
+        break;
+    case AST_AND:
+        fprintf(f, "node%d [label=\"AND\"];\n", current_node);
         break;
     case AST_LIST:
         fprintf(f, "node%d [label=\"LIST\"];\n", current_node);
