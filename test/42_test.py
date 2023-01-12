@@ -39,7 +39,7 @@ def perform_checks(expected: subprocess.CompletedProcess, actual: subprocess.Com
     "Something was expected on stderr\n"
 
     assert expected. returncode == actual. returncode, \
-    f"Exited with {actual. returncode} expected {expected. returncode}"
+    f"Exited with {actual. returncode} expected {expected. returncode}\n"
 
     assert expected.stdout == actual.stdout, \
     f"stdout differ\n{diff(expected.stdout, actual.stdout)}"
