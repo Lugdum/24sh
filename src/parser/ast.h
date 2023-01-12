@@ -13,7 +13,9 @@ enum ast_type
     AST_ELEMENT,
     AST_CMD,
     AST_IF,
-    AST_FOR
+    AST_FOR,
+    AST_WHILE,
+    AST_UNTIL
 };
 
 struct Node

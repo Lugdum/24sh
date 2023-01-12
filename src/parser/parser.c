@@ -22,6 +22,7 @@ int parse(struct Token *token, struct Node **ast)
     return 2;
 }
 
+
 // Parser les listes
 int parseList(struct Token **token, struct Node **ast)
 {
@@ -46,8 +47,7 @@ int parseList(struct Token **token, struct Node **ast)
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type == SC && (*token)->type != EF
-           && ((*token)->type != NL))
+    while (!*token && !res)
     {
         // Skip ';'
         (*token) = (*token)->next;
@@ -73,6 +73,7 @@ error:
     return 2;
 }
 
+
 // Parser les conditions AND OR
 int parseAndOr(struct Token **token, struct Node **ast)
 {
@@ -95,45 +96,60 @@ int parseAndOr(struct Token **token, struct Node **ast)
         struct Node *and_or = calloc(1, sizeof(struct Node));
         if (and_or == NULL)
             return 1;
-        if (op == AND)
-            and_or->type = AST_AND;
-        else
-            and_or->type = AST_OR;
-        and_or->children = calloc(2, sizeof(struct Node *));
-        if (and_or->children == NULL)
+        switch(op)
         {
-            free(and_or);
-            return 1;
+            case AND:
+                and_or->type = AST_AND;
+                break;
+            case OR:
+                and_or->type = AST_OR;
+                break;
+            default:
+                break;
+            and_or->children = calloc(2, sizeof(struct Node *));
+            if (and_or->children == NULL)
+            {
+                free(and_or);
+                return 1;
+            }
+            and_or->children[0] = *ast;
+            and_or->children[1] = right;
+            and_or->nb_children = 2;
+            *ast = and_or;
         }
-        and_or->children[0] = *ast;
-        and_or->children[1] = right;
-        and_or->nb_children = 2;
-        *ast = and_or;
     }
 
-    // S'il y a un if le parser
-    if (*token != NULL && (*token)->type == IF)
+    // S'il y a une rule la parser
+    if(*token != NULL)
     {
-        res = parseIf(token, ast);
-    }
-
-    // S'il y a un for le parser
-    if (*token != NULL && (*token)->type == FOR)
-    {
-        res = parseFor(token, ast);
+        switch((*token)->type)
+        {
+            case IF:
+                res = parseIf(token, ast);
+                break;
+            case FOR:
+                res = parseFor(token, ast);
+                break;
+            case UNTIL:
+                res = parseUntil(token, ast);
+                break;
+            case WHILE:
+                res = parseWhile(token, ast);
+                break;
+            default:
+                break;
+        }
     }
 
     return res;
 }
+
 
 // Parser les pipelines
 int parsePipeline(struct Token **token, struct Node **ast)
 {
     // Parser le premier element de PIPELINE
     int res = parseCommand(token, ast);
-
-    if (*token == NULL)
-        return 0;
 
     // S'il y a plusieurs trucs
     while (*token != NULL && (*token)->type == PIPE)
@@ -163,6 +179,7 @@ int parsePipeline(struct Token **token, struct Node **ast)
     return res;
 }
 
+
 // Parser les commandes
 int parseCommand(struct Token **token, struct Node **ast)
 {
@@ -175,22 +192,20 @@ int parseCommand(struct Token **token, struct Node **ast)
     (*ast)->type = AST_COMMAND;
     if ((*ast)->children == NULL)
         goto error;
-    if (parseSimpleCommand(token, &(*ast)->children[0]))
-        goto error;
+    parseSimpleCommand(token, &(*ast)->children[0]);
     if (!(*ast)->children[0])
         goto error;
     (*ast)->nb_children = 1;
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type > SC && (*token)->type != EF)
+    while (*token != NULL && (*token)->type > SC)
     {
         (*token) = (*token)->next;
         (*ast)->children = realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
         if ((*ast)->children == NULL)
             goto error;
-        if (parseSimpleCommand(token, &(*ast)->children[i]))
-            goto error;
+        parseSimpleCommand(token, &(*ast)->children[i]);
         (*ast)->nb_children += 1;
 
         i++;
@@ -202,6 +217,7 @@ error:
     free_ast(*ast);
     return 2;
 }
+
 
 // Parser les commandes simples
 int parseSimpleCommand(struct Token **token, struct Node **ast)
@@ -216,13 +232,11 @@ int parseSimpleCommand(struct Token **token, struct Node **ast)
     if ((*ast)->children == NULL)
         goto error;
     (*ast)->children[0] = parseWord(token);
-    if (!(*ast)->children[0])
-        goto error;
     (*ast)->nb_children = 1;
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type == WORD)
+    while (*token != NULL)
     {
         (*ast)->children =
             realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
@@ -241,12 +255,10 @@ error:
     return 2;
 }
 
+
 // Parser les mots
 struct Node *parseWord(struct Token **token)
 {
-    if (!(*token) || (*token)->type != WORD)
-        return NULL;
-
     struct Node *word = calloc(1, sizeof(struct Node));
     if (word == NULL)
         return NULL;
@@ -254,11 +266,6 @@ struct Node *parseWord(struct Token **token)
     word->nb_children = 0;
     word->value = calloc(strlen((*token)->value) + 1, sizeof(char));
     strcpy(word->value,((*token)->value));
-    if (word->value == NULL)
-    {
-        free(word);
-        return NULL;
-    }
     (*token) = (*token)->next;
 
     return word;

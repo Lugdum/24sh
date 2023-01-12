@@ -8,5 +8,7 @@
 
 int parseIf(struct Token **token, struct Node **if_node);
 int parseFor(struct Token **token, struct Node **ast);
+int parseWhile(struct Token **token, struct Node **ast);
+int parseUntil(struct Token **token, struct Node **ast);
 
 #endif /* !PARSER_RULES_H */
