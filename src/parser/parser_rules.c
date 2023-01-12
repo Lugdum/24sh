@@ -87,6 +87,8 @@ int parseFor(struct Token **token, struct Node **ast)
     if (parseAndOr(token, &cond))
         goto error;
 
+    if ((*token)->type == SC)
+        (*token) = (*token)->next;
     if (*token == NULL || (*token)->type != DO)
         return 2;
     (*token) = (*token)->next;
