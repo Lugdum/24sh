@@ -8,6 +8,10 @@ enum TokenType
     ELIF,
     ELSE,
     FI,
+    FOR,
+    IN,
+    DO,
+    DONE,
     SC,
     EF,
     NL,
@@ -26,6 +30,7 @@ struct Token
 };
 
 struct Token *lexer(char *arg);
+void free_lexer(struct Token *token);
 
 void print_token(struct Token *token);
 

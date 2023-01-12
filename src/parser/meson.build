@@ -1,1 +1,1 @@
-all_sources += files('parser.c')
+all_sources += files('parser.c', 'parser_print.c', 'parser_rules.c', 'ast.c')

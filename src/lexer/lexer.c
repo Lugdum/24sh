@@ -1,26 +1,27 @@
 #include "lexer.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 struct Token *process_end_of_file(struct Token *tok)
 {
-    struct Token *token  = calloc(1, sizeof(struct Token));
+    struct Token *token = calloc(1, sizeof(struct Token));
     token->value = NULL;
     token->next = NULL;
-    
+
     token->type = EF;
-    
+
     tok->next = token;
     return token;
 }
+
 struct Token *process(char *str, struct Token *tok)
 {
-    struct Token *token  = calloc(1, sizeof(struct Token));
+    struct Token *token = calloc(1, sizeof(struct Token));
     token->value = NULL;
     token->next = NULL;
-    
+
     if (strlen(str) == 0)
     {
         free(token);
@@ -48,6 +49,14 @@ struct Token *process(char *str, struct Token *tok)
         token->type = AND;
     else if (!strcmp("or", str))
         token->type = OR;
+    else if (!strcmp("for", str))
+        token->type = FOR;
+    else if (!strcmp("in", str))
+        token->type = IN;
+    else if (!strcmp("do", str))
+        token->type = DO;
+    else if (!strcmp("done", str))
+        token->type = DONE;
     else if (!strcmp(" ", str))
     {
         free(token);
@@ -58,7 +67,10 @@ struct Token *process(char *str, struct Token *tok)
         token->type = WORD;
         token->value = calloc(strlen(str) + 1, sizeof(char));
         if (!token->value)
+        {
+            free(token);
             return NULL;
+        }
         strcpy(token->value, str);
     }
     tok->next = token;
@@ -81,7 +93,7 @@ struct Token *lexer(char *input)
         {
             cur[j] = '\0';
             cur_tok = process(cur, cur_tok);
-            
+
             cur[0] = input[i];
             cur[1] = '\0';
             cur_tok = process(cur, cur_tok);
@@ -96,13 +108,17 @@ struct Token *lexer(char *input)
     cur[j] = '\0';
     cur_tok = process(cur, cur_tok);
     cur_tok = process_end_of_file(cur_tok);
-    
+
+    free(cur);
     return out->next;
 }
 
-void print_token(struct Token *token) {
-    while (token) {
-        switch (token->type) {
+void print_token(struct Token *token)
+{
+    while (token)
+    {
+        switch (token->type)
+        {
         case IF:
             printf("IF ");
             break;
@@ -123,6 +139,18 @@ void print_token(struct Token *token) {
             break;
         case OR:
             printf("OR ");
+            break;
+        case FOR:
+            printf("FOR ");
+            break;
+        case IN:
+            printf("IN ");
+            break;
+        case DO:
+            printf("DO ");
+            break;
+        case DONE:
+            printf("DONE ");
             break;
         case SC:
             printf("; ");
@@ -146,10 +174,23 @@ void print_token(struct Token *token) {
             printf("? ");
             break;
         }
-    token = token->next;
+        token = token->next;
     }
     printf("\n");
 }
+
+void free_lexer(struct Token *token)
+{
+    while (token != NULL)
+    {
+        struct Token *next = token->next;
+        free(token->value);
+        free(token);
+        token = next;
+    }
+}
+
+
 /*
 int main(int argc, char *argv[])
 {

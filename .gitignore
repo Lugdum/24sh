@@ -1,3 +1,6 @@
 *.o
+*/builddir/*
 builddir/*
 .vscode
+graph
+graph.png
