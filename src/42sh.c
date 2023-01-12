@@ -56,18 +56,16 @@ int main(int argc, char **argv)
     printf("argv[2] : |%s\n", argv[2]);*/
 
 
-    if (argc == 2)
+    if (argc >= 2 || !strcmp(argv[1], "-c"))
     {
-        char *script = file_to_char(argv[1]);
-        if (script == NULL)
-            return res;
-    }
-
-    else if (argc >= 3 && !strcmp(argv[1], "-c"))
-    {
-        struct Token *tokens = lexer(argv[2]);
-        /*printf("tokens:\n");
-        print_token(tokens);*/
+        struct Token *tokens;
+        if (argc == 2)
+        {
+            char *script = file_to_char(argv[1]);
+            tokens = lexer(script);
+        }
+        else
+            tokens = lexer(argv[2]);
         struct Node *ast = NULL;
         res = parse(tokens, &ast);
         if (res)
@@ -77,11 +75,11 @@ int main(int argc, char **argv)
         }
 
         // Print if asked in argument
-        if (argc >= 4 && argv[3][0] == 't')
+        if (argc >= 4 && argv[argc+1][0] == 't')
             print_token(tokens);
-        if (argc >= 4 && (!strcmp(argv[3], "pp") || !strcmp(argv[3], "tpp")))
+        if (argc >= 4 && (!strcmp(argv[argc+1], "pp") || !strcmp(argv[argc+1], "tpp")))
             prettyprint(ast, stdout);
-        else if (argc >= 4 && (!strcmp(argv[3], "sp") || !strcmp(argv[3], "tsp")))
+        else if (argc >= 4 && (!strcmp(argv[argc+1], "sp") || !strcmp(argv[argc+1], "tsp")))
             sexyprint(ast);
         
         if (!res)
