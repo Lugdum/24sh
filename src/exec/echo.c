@@ -1,5 +1,4 @@
 #include "echo.h"
-#include "exec.h"
 
 #include <stdio.h>
 #include <string.h>

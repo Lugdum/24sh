@@ -2,6 +2,7 @@
 #define ECHO_H
 
 #include "../parser/parser.h"
+#include "exec.h"
 
 int echo(struct Node *ast, int fd);
 
