@@ -5,8 +5,6 @@
 #include <string.h>
 
 
-struct variable_list *list;
-
 int exec_command(struct Node *ast)
 {
     if (!strcmp(ast->children[0]->value, "echo"))
@@ -39,12 +37,12 @@ int process_for(struct Node *ast)
     struct Node *tmp = ast->children[0]->children[0];
     for (int i = 0; i < tmp->nb_children; i++)
     {
-        if (strcmp(tmp->children[i]->value, ".."))
-        {
+   /*     if (strcmp(tmp->children[i]->value, ".."))
+        {*/
             //if not..
-            modify_value(list, ast->value, tmp->children[i]->value);
+            modify_value(var_list, ast->value, tmp->children[i]->value);
             r = node_type(ast->children[1]);
-        }
+      /*  }
         else
         {
             char *end;
@@ -70,25 +68,28 @@ int process_for(struct Node *ast)
             }
             if (int_begin < int_end)
             {
-            for (; int_begin + 1 < int_end; int_begin ++)
+                int_begin++;
+            for (; int_begin < int_end; int_begin ++)
             {
                 char *buffer = calloc(101, 1);
                 sprintf(buffer, "%ld", int_begin);
-                modify_value(list, ast->value, buffer);
+                modify_value(var_list, ast->value, buffer);
                 r = node_type(ast->children[1]);
             }
             }
             else
             {
-            for (; int_begin - 1 < int_end; int_begin --)
+                int_begin--;
+            for (; int_begin > int_end; int_begin --)
             {
                 char *buffer = calloc(101, 1);
                 sprintf(buffer, "%ld", int_begin);
-                modify_value(list, ast->value, buffer);
+                modify_value(var_list, ast->value, buffer);
                 r = node_type(ast->children[1]);
             }
             }
-        }
+            break;
+        }*/
     }
     return r;
 }
@@ -190,8 +191,8 @@ int node_type(struct Node *ast)
 
 int main_exec(struct Node *ast)
 {
-    list = calloc(1, sizeof(struct variable_list));
-    list->size = 0;
-    list->list = NULL;
+    var_list = calloc(1, sizeof(struct variable_list));
+    var_list->size = 0;
+    var_list->list = NULL;
     return node_type(ast);
 }

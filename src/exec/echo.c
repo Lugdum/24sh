@@ -1,4 +1,5 @@
 #include "echo.h"
+#include "exec.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -52,13 +53,19 @@ int echo(struct Node *ast, int fd)
 
     for (int i = son; i < ast->nb_children; i++)
     {
-        if (flag_e)
-        {
             // Remplace les séquences d'échappement précédées de \ par leurs
             // équivalents ASCII
             for (int j = 0; ast->children[i]->value[j] != '\0'; j++)
             {
-                if (ast->children[i]->value[j] == '\\' && !flag_E)
+                if (ast->children[i]->value[j] == '$')
+                {
+                    char *var = ast->children[i]->value + 1;
+                    char *word = find_value(var_list, var);
+                    printf("%s", word);
+                    j = strlen(ast->children[i]->value) - 1;
+                    continue;
+                }
+                if (ast->children[i]->value[j] == '\\' && !flag_E && flag_e)
                 {
                     switch (ast->children[i]->value[j + 1])
                     {
@@ -93,11 +100,6 @@ int echo(struct Node *ast, int fd)
                     putchar(ast->children[i]->value[j]);
                 }
             }
-        }
-        else
-        {
-            printf("%s", ast->children[i]->value);
-        }
 
         // Ajoute un espace entre chaque argument, sauf pour le dernier
         if (i < ast->nb_children - son)
