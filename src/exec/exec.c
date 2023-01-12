@@ -59,12 +59,12 @@ int process_pipe(struct Node *ast)
 
 int process_and(struct Node *ast)
 {
-    return node_type(ast->children[0]) && node_type(ast->children[0]);
+    return node_type(ast->children[0]) && node_type(ast->children[1]);
 }
 
 int process_or(struct Node *ast)
 {
-    return node_type(ast->children[0]) || node_type(ast->children[0]);
+    return node_type(ast->children[0]) || node_type(ast->children[1]);
 }
 
 int node_type(struct Node *ast)
@@ -78,6 +78,10 @@ int node_type(struct Node *ast)
     case AST_PIPELINE:
         // TODO
         break;
+    case AST_AND:
+        return process_and(ast);
+    case AST_OR:
+        return process_or(ast);
     case AST_COMMAND:
         return process_cmd(ast);
     case AST_SIMPLE_COMMAND:
