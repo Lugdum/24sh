@@ -20,7 +20,9 @@ char *file_to_char(char *file)
     FILE *fp = fopen(file, "r");
     if (fp == NULL)
     {
-        printf("An error occured when openning %s\n", file);
+        fprintf(stderr, "An error occured when openning %s\n", file);
+        free(script); 
+        return NULL;
     }
     while (getline(&line, &len, fp) != -1)
     {
@@ -43,6 +45,7 @@ char *file_to_char(char *file)
     }
     if (line)
         free(line);
+    fclose(fp);
     script[n -  1] = '\0';
     return script;
 }
@@ -51,59 +54,62 @@ char *file_to_char(char *file)
 int main(int argc, char **argv)
 {
     int res = 1;
-    /*printf("argv[0] : |%s\n", argv[0]);
-    printf("argv[1] : |%s\n", argv[1]);
-    printf("argv[2] : |%s\n", argv[2]);*/
 
-
-    if (argc >= 2 || !strcmp(argv[1], "-c"))
+    struct Token *tokens;
+    
+    //load token from diff sources
+    // from stdin
+    if (argc == 1)
     {
-        struct Token *tokens;
-        if (argc == 2)
-        {
-            char *script = file_to_char(argv[1]);
-            tokens = lexer(script);
-        }
-        else
-            tokens = lexer(argv[2]);
-        struct Node *ast = NULL;
-        res = parse(tokens, &ast);
-        if (res)
-        {
-            free_lexer(tokens);
-            return res;
-        }
-
-        // Print if asked in argument
-        if (argc >= 4 && argv[argc-1][0] == 't')
-            print_token(tokens);
-        if (argc >= 4 && (!strcmp(argv[argc-1], "pp") || !strcmp(argv[argc-1], "tpp")))
-            prettyprint(ast, stdout);
-        else if (argc >= 4 && (!strcmp(argv[argc-1], "sp") || !strcmp(argv[argc-1], "tsp")))
-            sexyprint(ast);
-        
-        if (!res)
-            main_exec(ast);
-
-        free_lexer(tokens);
-        free_ast(ast);
+        char *buffer = calloc(20000, 1);
+        read(STDIN_FILENO, buffer, 20000);
+        tokens = lexer(buffer);
+        free(buffer);
     }
-
-    else if ((strcmp(argv[1], "<") == 0))
+    //from file
+    else if (argc >= 2 && strcmp(argv[1], "-c"))
     {
-        printf ("%s", argv[1]);
-        int dup_stdin = dup(STDIN_FILENO);
-        int fd = open(argv[2], O_WRONLY | O_TRUNC, 0764);
-        if (fd == -1)
-            return 1;
-
-        dup2(fd, STDIN_FILENO);
-        char *script = file_to_char(argv[2]);
+        char *script = file_to_char(argv[1]);
         if (script == NULL)
+        {
+            free(script);
             return 1;
-        //printf("from < : |%s\n", script);
-        dup2(dup_stdin, STDIN_FILENO);
-        close(dup_stdin);
+        }
+        tokens = lexer(script);
+        free(script);
     }
+    //script given directly as parameter
+    else if (argc >= 3 && !strcmp(argv[1], "-c"))
+            tokens = lexer(argv[2]);
+    else
+    {
+        fprintf(stderr, "Wrong arguments\n");
+        return res;
+    }
+    //print tokens
+    if (argc >= 3 && argv[argc-1][0] == 't')
+        print_token(tokens);
+
+    // Parse tokens
+    struct Node *ast = NULL;
+    res = parse(tokens, &ast);
+    if (res)
+    {
+        free_lexer(tokens);
+        return res;
+    }
+
+    // Print if asked in argument
+    if (argc >= 3 && (!strcmp(argv[argc-1], "pp") || !strcmp(argv[argc-1], "tpp")))
+        prettyprint(ast, stdout);
+    else if (argc >= 3 && (!strcmp(argv[argc-1], "sp") || !strcmp(argv[argc-1], "tsp")))
+        sexyprint(ast);
+    
+    // exec script if no error
+    if (!res)
+        main_exec(ast);
+
+    free_lexer(tokens);
+    free_ast(ast);
     return res;
 }

@@ -5,3 +5,4 @@ builddir/*
 graph
 graph.png
 *.swp
+trash.sh

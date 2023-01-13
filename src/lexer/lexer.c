@@ -86,6 +86,7 @@ struct Token *process(char *str, struct Token *tok)
 
 struct Token *lexer(char *input)
 {
+   // printf("%s\n", input);
     struct Token *out = calloc(1, sizeof(struct Token));
     if (!out)
         return NULL;
@@ -110,6 +111,9 @@ struct Token *lexer(char *input)
             {
                 cur[j] = '\0';
                 cur_tok = process(cur, cur_tok);
+    /*            cur[0] = input[i];
+                cur[1] = '\0';
+                cur_tok = process(cur, cur_tok);*/
                 j = 0;
             }
             else
@@ -216,13 +220,3 @@ void free_lexer(struct Token *token)
         token = next;
     }
 }
-
-
-/*
-int main(int argc, char *argv[])
-{
-    if (argc == 2)
-        print_token(lexer(argv[1]));
-    return 0;
-}
-*/
