@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 struct Token *process_end_of_file(struct Token *tok)
 {
@@ -68,6 +69,8 @@ struct Token *process(char *str, struct Token *tok)
     }
     else
     {
+        if (str[strlen(str) - 1] == '\\')
+            str[strlen(str) - 1] = '\0';
         token->type = WORD;
         token->value = calloc(strlen(str) + 1, sizeof(char));
         if (!token->value)
@@ -91,17 +94,29 @@ struct Token *lexer(char *input)
     int len = strlen(input);
     char *cur = calloc(len + 1, 1);
     int j = 0;
+    bool quote = false;
     for (int i = 0; i < len; i++)
     {
+        if (input[i] == '\"' && input[i-1] != '\\')
+        {
+            quote = !quote;
+            continue;
+        }
+        if (input[i] == '\\' && !quote)
+            continue;
         if (input[i] == ' ' || input[i] == ';' || input[i] == '\n')
         {
-            cur[j] = '\0';
-            cur_tok = process(cur, cur_tok);
-
-            cur[0] = input[i];
-            cur[1] = '\0';
-            cur_tok = process(cur, cur_tok);
-            j = 0;
+            if (!quote)
+            {
+                cur[j] = '\0';
+                cur_tok = process(cur, cur_tok);
+                j = 0;
+            }
+            else
+            {
+                cur[j] = input[i];
+                j++;
+            }
         }
         else
         {

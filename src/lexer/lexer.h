@@ -16,9 +16,9 @@ enum TokenType
     DONE,
     AND,
     OR,
-    SC,
     EF,
     NL,
+    SC,
     SQ,
     PIPE,
     WORD
