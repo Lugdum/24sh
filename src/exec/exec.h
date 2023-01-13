@@ -7,7 +7,7 @@
 
 #ifndef VARLIST
 #define VARLIST
-struct variable_list *var_list;
+extern struct variable_list *var_list;
 #endif
 
 int main_exec(struct Node *ast);

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct variable_list *var_list;
 
 int exec_command(struct Node *ast)
 {
