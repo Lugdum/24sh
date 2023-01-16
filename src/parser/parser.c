@@ -47,7 +47,7 @@ int parseList(struct Token **token, struct Node **ast)
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (!*token && !res)
+    while (*token != NULL && (*token)->type == SC && !res)
     {
         // Skip ';'
         (*token) = (*token)->next;
@@ -125,38 +125,23 @@ int parseAndOr(struct Token **token, struct Node **ast)
     // S'il y a une rule la parser
     if(*token != NULL)
     {
-        int is_rule = 1;
-        struct Node *rule = NULL;
         switch((*token)->type)
         {
             case IF:
-                res = parseIf(token, &rule);
+                res = parseIf(token, ast);
                 break;
             case FOR:
-                res = parseFor(token, &rule);
+                res = parseFor(token, ast);
                 break;
             case UNTIL:
-                res = parseUntil(token, &rule);
+                res = parseUntil(token, ast);
                 break;
             case WHILE:
-                res = parseWhile(token, &rule);
+                res = parseWhile(token, ast);
                 break;
             default:
-                is_rule = 0;
                 break;
         }
-        if (*ast && is_rule)
-        {
-            struct Node *list = calloc(1, sizeof(struct Node));
-            list->type = AST_LIST;
-            list->children = calloc(2, sizeof(struct Node *));
-            list->children[0] = *ast;
-            list->children[1] = rule;
-            list->nb_children = 2;
-            *ast = list;
-        }
-        else if (!*ast)
-            *ast = rule;
     }
 
     return res;
@@ -289,8 +274,8 @@ struct Node *parseWord(struct Token **token)
     word->value = calloc(strlen((*token)->value) + 1, sizeof(char));
     strcpy(word->value,((*token)->value));
     (*token) = (*token)->next;
-        if ((*token)->type == SC || (*token)->type == NL)
-            (*token) = (*token)->next;
+    /*if (((*token)->type == SC || (*token)->type == NL))
+        (*token) = (*token)->next;*/
 
     return word;
 }
