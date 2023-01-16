@@ -6,20 +6,40 @@
 
 struct variable_list *var_list;
 
+int process_variable(struct Node *ast)
+{
+    if (ast->value == NULL)
+        return 2;
+    char *save;
+    char *prefix = strtok_r(ast->value, "= ", &save);
+    if (prefix == NULL)
+        return 2;
+    char *val = strtok(NULL, "= ", &save);
+    if (val == NULL)
+        return 2;
+    modify_value(var_list, prefix, val);
+    return 1;
+}
+
 int exec_command(struct Node *ast)
 {
     if (!strcmp(ast->children[0]->value, "echo"))
     {
         return echo(ast, 1);
     }
-    if (!strcmp(ast->children[0]->value, "true"))
+    else if (!strcmp(ast->children[0]->value, "true"))
     {
         return 1;
     }
-    if (!strcmp(ast->children[0]->value, "false"))
+    else if (!strcmp(ast->children[0]->value, "false"))
     {
         return 0;
     }
+    else
+    {
+        return process_variable(ast->children[0]);
+    }
+
     return 1;
 }
 
@@ -38,63 +58,36 @@ int process_for(struct Node *ast)
     struct Node *tmp = ast->children[0]->children[0];
     for (int i = 0; i < tmp->nb_children; i++)
     {
-   /*     if (strcmp(tmp->children[i]->value, ".."))
-        {*/
-            //if not..
-            modify_value(var_list, ast->value, tmp->children[i]->value);
-            r = node_type(ast->children[1]);
-      /*  }
-        else
-        {
-            char *end;
-            if (tmp->nb_children <= i + 1)
-            {
-                //last char ..
-                fprintf( stderr, "invalid for loop condition");
-                return 2;
-            }
-            long int_begin = strtol(tmp->children[i - 1]->value, &end, 10);
-            if (!strcmp(tmp->children[i]->value, end))
-            {
-                //letter in nuber
-                fprintf( stderr, "invalid chars in for loop condition begin\n");
-                return 2;
-            }
-            long int_end = strtol(tmp->children[i + 1]->value, &end, 10);
-            if (!strcmp(tmp->children[i]->value, end))
-            {
-                //letter in nuber
-                fprintf( stderr, "invalid chars in for loop condition end\n");
-                return 2;
-            }
-            if (int_begin < int_end)
-            {
-                int_begin++;
-            for (; int_begin < int_end; int_begin ++)
-            {
-                char *buffer = calloc(101, 1);
-                sprintf(buffer, "%ld", int_begin);
-                modify_value(var_list, ast->value, buffer);
-                r = node_type(ast->children[1]);
-            }
-            }
-            else
-            {
-                int_begin--;
-            for (; int_begin > int_end; int_begin --)
-            {
-                char *buffer = calloc(101, 1);
-                sprintf(buffer, "%ld", int_begin);
-                modify_value(var_list, ast->value, buffer);
-                r = node_type(ast->children[1]);
-            }
-            }
-            break;
-        }*/
+        modify_value(var_list, ast->value, tmp->children[i]->value);
+        r = node_type(ast->children[1]);
+        if (r == 2)
+            return 2;
     }
     return r;
 }
 
+int process_while(struct Node *ast)
+{
+    int r = 1;
+    while (node_type(ast->children[0]))
+    {
+        r = node_type(ast->children[1]);
+        if (r == 2)
+            return 2;
+    }
+    return r;
+}
+int process_until(struct Node *ast)
+{
+    int r = 1;
+    while (!node_type(ast->children[0]))
+    {
+        r = node_type(ast->children[1]);
+        if (r == 2)
+            return 2;
+    }
+    return r;
+}
 int process_cmd(struct Node *ast)
 {
     int r = 1;
@@ -176,6 +169,12 @@ int node_type(struct Node *ast)
         break;
     case AST_COMMAND:
         r = process_cmd(ast);
+        break;
+    case AST_WHILE:
+        r = process_while(ast);
+        break;
+    case AST_UNTIL:
+        r = process_until(ast);
         break;
     case AST_SIMPLE_COMMAND:
         r = exec_command(ast);
