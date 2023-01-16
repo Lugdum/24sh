@@ -31,9 +31,10 @@ char *file_to_char(char *file)
         script = realloc(script, sizeof(char) * (n + len));
         while (i < len)
         {
+            // I need the \n for the comments
             if (line[i] == '\n')
             {
-                script[n - 1] = ';';
+                script[n - 1] = '\n';
                 i++;
                 n++;
                 continue;

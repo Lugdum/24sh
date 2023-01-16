@@ -96,15 +96,28 @@ struct Token *lexer(char *input)
     char *cur = calloc(len + 1, 1);
     int j = 0;
     bool quote = false;
-    for (int i = 0; i < len; i++)
+    int i = 0;
+    char past = 0;
+    while (i < len)
     {
+        if (input[i] == '#' && past == '\n')
+        {
+            while (input[i] != '\n')
+                i++;
+            i++;
+            continue;
+        }
         if (input[i] == '\"' && input[i-1] != '\\')
         {
             quote = !quote;
+            i++;
             continue;
         }
         if (input[i] == '\\' && !quote)
+        {
+            i++;
             continue;
+        }
         if (input[i] == ' ' || input[i] == ';' || input[i] == '\n')
         {
             if (!quote)
@@ -112,6 +125,8 @@ struct Token *lexer(char *input)
                 cur[j] = '\0';
                 cur_tok = process(cur, cur_tok);
                 cur[0] = input[i];
+                if (input[i] == '\n')
+                    cur[0] = ';';
                 cur[1] = '\0';
                 cur_tok = process(cur, cur_tok);
                 j = 0;
@@ -127,6 +142,8 @@ struct Token *lexer(char *input)
             cur[j] = input[i];
             j++;
         }
+        past = input[i];
+        i++;
     }
     cur[j] = '\0';
     cur_tok = process(cur, cur_tok);
