@@ -111,9 +111,9 @@ struct Token *lexer(char *input)
             {
                 cur[j] = '\0';
                 cur_tok = process(cur, cur_tok);
-    /*            cur[0] = input[i];
+                cur[0] = input[i];
                 cur[1] = '\0';
-                cur_tok = process(cur, cur_tok);*/
+                cur_tok = process(cur, cur_tok);
                 j = 0;
             }
             else
