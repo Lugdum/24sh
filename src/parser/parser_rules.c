@@ -47,6 +47,8 @@ int parseIf(struct Token **token, struct Node **if_node)
     if ((*token) != NULL && (*token)->type == ELSE)
     {
         (*token) = (*token)->next;
+        if ((*token)->type == SC || (*token)->type == NL)
+            (*token) = (*token)->next;
 
         (*if_node)->children =
             realloc((*if_node)->children, 3 * sizeof(struct Node *));
@@ -64,8 +66,8 @@ int parseIf(struct Token **token, struct Node **if_node)
         (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != FI)
         goto error;
-
     (*token) = (*token)->next;
+
     return 0;
 
 error:
