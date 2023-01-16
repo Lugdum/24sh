@@ -14,7 +14,7 @@ int process_variable(struct Node *ast)
     char *prefix = strtok_r(ast->value, "= ", &save);
     if (prefix == NULL)
         return 2;
-    char *val = strtok(NULL, "= ", &save);
+    char *val = strtok_r(NULL, "= ", &save);
     if (val == NULL)
         return 2;
     modify_value(var_list, prefix, val);
@@ -39,7 +39,6 @@ int exec_command(struct Node *ast)
     {
         return process_variable(ast->children[0]);
     }
-
     return 1;
 }
 
