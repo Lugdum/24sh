@@ -35,7 +35,7 @@ int parseIf(struct Token **token, struct Node **if_node)
     (*if_node)->children = realloc((*if_node)->children, 2 * sizeof(struct Node *));
     if ((*if_node)->children == NULL)
         goto error;
-    if (parseAndOr(token, &(*if_node)->children[1]))
+    if (parseList(token, &(*if_node)->children[1]))
         goto error;
     if ((*if_node)->children[1] == NULL)
         goto error;
@@ -52,7 +52,7 @@ int parseIf(struct Token **token, struct Node **if_node)
             realloc((*if_node)->children, 3 * sizeof(struct Node *));
         if ((*if_node)->children == NULL)
             goto error;
-        if (parseAndOr(token, &(*if_node)->children[2]))
+        if (parseList(token, &(*if_node)->children[2]))
             goto error;
         if ((*if_node)->children[2] == NULL)
             goto error;
@@ -148,6 +148,8 @@ int parseWhile(struct Token **token, struct Node **ast)
         goto error;
     (*ast)->nb_children = 1;
 
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != DO)
         goto error;
     (*token) = (*token)->next;
@@ -158,7 +160,7 @@ int parseWhile(struct Token **token, struct Node **ast)
     (*ast)->children = realloc((*ast)->children, 2 * sizeof(struct Node *));
     if ((*ast)->children == NULL)
         goto error;
-    if (parseAndOr(token, &(*ast)->children[1]))
+    if (parseList(token, &(*ast)->children[1]))
         goto error;
     if ((*ast)->children[1] == NULL)
         goto error;
@@ -195,6 +197,8 @@ int parseUntil(struct Token **token, struct Node **ast)
         goto error;
     (*ast)->nb_children = 1;
 
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
     if ((*token) == NULL || (*token)->type != DO)
         goto error;
 
@@ -206,7 +210,7 @@ int parseUntil(struct Token **token, struct Node **ast)
     (*ast)->children = realloc((*ast)->children, 2 * sizeof(struct Node *));
     if ((*ast)->children == NULL)
         goto error;
-    if (parseAndOr(token, &(*ast)->children[1]))
+    if (parseList(token, &(*ast)->children[1]))
         goto error;
     if ((*ast)->children[1] == NULL)
         goto error;
