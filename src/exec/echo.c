@@ -55,7 +55,7 @@ int echo(struct Node *ast, int fd)
     {
             // Remplace les séquences d'échappement précédées de \ par leurs
             // équivalents ASCII
-        char *value = expand_variables(ast->children[i]->value);
+        char *value = expand_variables_single(ast->children[i]->value);
             for (int j = 0; value[j] != '\0'; j++)
             {
                  

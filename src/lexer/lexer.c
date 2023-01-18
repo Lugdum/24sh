@@ -112,11 +112,9 @@ struct Token *lexer(char *input)
         if ((input[i] == '\"' || input[i] == '\'') && input[i-1] != '\\')
         {
             quote = !quote;
-            if (input[i] == '\'')
-            {
-                cur[j] = input[i];
-                j++;
-            }
+            cur[j] = input[i];
+            j++;
+            
             i++;
             continue;
         }

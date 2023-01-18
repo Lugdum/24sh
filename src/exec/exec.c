@@ -1,4 +1,5 @@
 #include "exec.h"
+#include "../variable/variable.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,16 +7,17 @@
 
 struct variable_list *var_list;
 char **input_arguments;
+int exit_status;
 
 int process_variable(struct Node *ast)
 {
     if (ast->value == NULL)
         return 2;
     char *save;
-    char *prefix = strtok_r(ast->value, "= ", &save);
+    char *prefix = strtok_r(ast->value, "=", &save);
     if (prefix == NULL)
         return 2;
-    char *val = strtok_r(NULL, "= ", &save);
+    char *val = strtok_r(NULL, "=\"\'", &save);
     if (val == NULL)
         return 2;
     modify_value(var_list, prefix, val);
@@ -63,11 +65,35 @@ int process_for(struct Node *ast)
     struct Node *tmp = ast->children[0]->children[0]->children[0];
     for (int i = 0; i < tmp->nb_children; i++)
     {
-        modify_value(var_list, ast->value, tmp->children[i]->value);
-        r = node_type(ast->children[1]);
-        if (r == 2)
-            return 2;
+        char **expanded = expand_variables(tmp->children[i]->value);
+        int j = 0;
+        while (expanded[j])
+        {
+            modify_value(var_list, ast->value, expanded[j]);
+            r = node_type(ast->children[1]);
+            //error
+            if (r == 2)
+            {
+                int k = 0;
+                while (expanded[k])
+                {
+                    free(expanded[k]);
+                    k++;
+                }
+                free(expanded);
+                return 2;
+            }
+            j++;
+        }
+        int k = 0;
+        while (expanded[k])
+        {
+            free(expanded[k]);
+            k++;
+        }
+        free(expanded);
     }
+
     return r;
 }
 
@@ -210,7 +236,13 @@ int main_exec(struct Node *ast, char **input_args)
     var_list->size = 0;
     var_list->list = NULL;
     input_arguments = input_args;
+    exit_status = 0;
+    
+    
+
     int r = node_type(ast);
+
+    free_list(var_list);
     if (r == 0 || r == 1)
         return 0;
     return r;
