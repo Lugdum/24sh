@@ -77,6 +77,7 @@ int main(int argc, char **argv)
             return 1;
         }
         tokens = lexer(script);
+        //printf("%s\n", script);
         free(script);
     }
     //script given directly as parameter

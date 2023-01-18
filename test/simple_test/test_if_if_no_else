@@ -1,5 +1,5 @@
 if false && false
     then echo LOOSE
     else if false && true
-    then echo WIN
+    then echo LOOSE
 fi fi

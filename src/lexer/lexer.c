@@ -113,7 +113,7 @@ struct Token *lexer(char *input)
             i++;
             continue;
         }
-        if (input[i] == '\\' && !quote)
+        if ((input[i] == '\\' && !quote) || input[i] == '\r')
         {
             i++;
             continue;

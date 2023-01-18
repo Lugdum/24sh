@@ -47,7 +47,12 @@ int process_if(struct Node *ast)
     if (node_type(ast->children[0]))
         return node_type(ast->children[1]);
     else
-        return node_type(ast->children[2]);
+    {
+        if (ast->nb_children == 3)
+            return node_type(ast->children[2]);
+        else
+            return 0;
+    }
 }
 
 int process_for(struct Node *ast)
