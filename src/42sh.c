@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     
     // exec script if no error
     if (!res)
-        main_exec(ast, input_args);
+        res = main_exec(ast, input_args);
 
     free_lexer(tokens);
     free_ast(ast);
