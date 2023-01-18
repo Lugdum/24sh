@@ -18,9 +18,10 @@ enum TokenType
     OR,
     EF,
     NL,
-    SC,
-    SQ,
     PIPE,
+    SC,
+    EM,
+    SQ,
     WORD
 };
 
@@ -28,7 +29,6 @@ struct Token
 {
     enum TokenType type;
     char *value;
-    int single_quoted;
     struct Token *next;
 };
 

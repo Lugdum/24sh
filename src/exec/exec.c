@@ -30,11 +30,11 @@ int exec_command(struct Node *ast)
     }
     else if (!strcmp(ast->children[0]->value, "true"))
     {
-        return 1;
+        return 0;
     }
     else if (!strcmp(ast->children[0]->value, "false"))
     {
-        return 0;
+        return 1;
     }
     else
     {

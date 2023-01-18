@@ -73,14 +73,62 @@ error:
     return 2;
 }
 
+
+int parseRule(struct Token **token, struct Node **ast)
+{
+    int res = 0;
+    // S'il y a une rule la parser
+    if(*token != NULL)
+    {
+        switch((*token)->type)
+        {
+            case IF:
+                res = parseIf(token, ast);
+                break;
+            case FOR:
+                res = parseFor(token, ast);
+                break;
+            case UNTIL:
+                res = parseUntil(token, ast);
+                break;
+            case WHILE:
+                res = parseWhile(token, ast);
+                break;
+            default:
+                break;
+        }
+    }
+    return res;
+}
+
+
+// Parser les ! (ne sert a rien)
+int parseEM(struct Token **token, struct Node **ast)
+{
+    if ((*token)->type != EM)
+        return 0;
+    struct Node *em = calloc(1, sizeof(struct Node));
+    if (em == NULL)
+        return 1;
+    em->type = AST_EM;
+    (*token) = (*token)->next;
+    *ast = em;
+    return 0;
+}
+
+
 // Parser les conditions AND OR
 int parseAndOr(struct Token **token, struct Node **ast)
 {
-    // Parser le premier élément de AND_OR
-    int res;
-    if ((*token)->type == WORD)
-        res = parsePipeline(token, ast);
+    // Parser les rules ou les ! s'il y en a
+    if (parseRule(token, ast))
+        return 2;
 
+    // Parser le premier élément de AND_OR
+    if (((*token)->type == WORD || (*token)->type == EM) && parsePipeline(token, ast))
+        return 2;
+    
+    int res = 0;
     if (*token == NULL)
         return res;
 
@@ -122,28 +170,6 @@ int parseAndOr(struct Token **token, struct Node **ast)
         *ast = and_or;
     }
 
-    // S'il y a une rule la parser
-    if(*token != NULL)
-    {
-        switch((*token)->type)
-        {
-            case IF:
-                res = parseIf(token, ast);
-                break;
-            case FOR:
-                res = parseFor(token, ast);
-                break;
-            case UNTIL:
-                res = parseUntil(token, ast);
-                break;
-            case WHILE:
-                res = parseWhile(token, ast);
-                break;
-            default:
-                break;
-        }
-    }
-
     return res;
 }
 
@@ -152,7 +178,19 @@ int parseAndOr(struct Token **token, struct Node **ast)
 int parsePipeline(struct Token **token, struct Node **ast)
 {
     // Parser le premier element de PIPELINE
-    int res = parseCommand(token, ast);
+    struct Node *pipeline = calloc(1, sizeof(struct Node));
+    pipeline->children = calloc(1, sizeof(struct Node *));
+    pipeline->nb_children = 1;
+    // S'il y a !
+    if ((*token)->type == EM)
+    {
+        pipeline->type = AST_EM;
+        (*token) = (*token)->next;
+    }
+    else
+        pipeline->type = AST_PIPELINE;
+    int res = parseCommand(token, &pipeline->children[0]);
+    *ast = pipeline;
 
     // S'il y a plusieurs trucs
     while (*token != NULL && (*token)->type == PIPE)
@@ -161,6 +199,14 @@ int parsePipeline(struct Token **token, struct Node **ast)
         (*token) = (*token)->next;
         if ((*token)->type == SC || (*token)->type == NL)
             (*token) = (*token)->next;
+        
+        // S'il y a !
+        enum TokenType type = AST_PIPELINE;
+        if ((*token)->type == EM)
+        {
+            (*token) = (*token)->next;
+            type = AST_EM;
+        }
         struct Node *right = NULL;
         parseCommand(token, &right);
 
@@ -168,7 +214,7 @@ int parsePipeline(struct Token **token, struct Node **ast)
         struct Node *pipeline = calloc(1, sizeof(struct Node));
         if (pipeline == NULL)
             return 1;
-        pipeline->type = AST_PIPELINE;
+        pipeline->type = type;
         pipeline->children = calloc(2, sizeof(struct Node *));
         if (pipeline->children == NULL)
         {
@@ -194,7 +240,8 @@ int parseCommand(struct Token **token, struct Node **ast)
 
     // Parser le premier element de la commande
     (*ast)->children = calloc(1, sizeof(struct Node *));
-    (*ast)->type = AST_COMMAND;
+    if ((*ast)->type != AST_EM)
+        (*ast)->type = AST_COMMAND;
     if ((*ast)->children == NULL)
         goto error;
     parseSimpleCommand(token, &(*ast)->children[0]);
