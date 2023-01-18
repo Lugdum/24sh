@@ -54,6 +54,24 @@ void free_list(struct variable_list *list)
     free(list);
 }
 
+char *expand_at()
+{
+    int i = 0;
+    char *r = calloc(1, 1);
+    int size = 0;
+    while (input_arguments[i] != 0)
+    {
+        r = realloc(r, size + 1 + strlen(input_arguments[i]));
+        r[size] = ' ';
+        strcpy(r + size + 1, input_arguments[i]);
+        size += 1 + strlen(input_arguments[i]);
+        i++;
+    }
+    return r;
+}
+
+
+
 char *expand_variables(char *str)
 {
     int size = strlen(str);
@@ -69,6 +87,7 @@ char *expand_variables(char *str)
         else if (!quot && str[i] == '$')
         {
             int tmp = i + 1;
+            int free_word = 1;
             char *word;
             //get var name
             while (str[i] != 0 && str[i] != ' ' && str[i] != '\'')
@@ -80,11 +99,11 @@ char *expand_variables(char *str)
             {
                 char *var_name = calloc(i - tmp + 2, 1);
                 var_name = strncpy(var_name, str + tmp, i - tmp);
-                if (!strcmp("@", var_name))
-                    //TODO
-                    break;
                 else
+                {
                     word = find_value(var_list, var_name);
+                    free_word = 0;
+                }
                 free(var_name);
             }
 
@@ -92,6 +111,8 @@ char *expand_variables(char *str)
             r = realloc(r, size + strlen(word));
             strcpy(r + j, word);
             j += strlen(word);
+            if (free_word)
+                free(word);
         }
         else
         {

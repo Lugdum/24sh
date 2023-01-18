@@ -3,6 +3,7 @@
 #include "parser/parser.h"
 #include "parser/ast.h"
 #include "exec/exec.h"
+#include "variable/variable.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -56,6 +57,7 @@ int main(int argc, char **argv)
 {
     int res = 1;
     struct Token *tokens;
+    char **input_args;
     
     //load token from diff sources
     // from stdin
@@ -79,13 +81,13 @@ int main(int argc, char **argv)
         //printf("%s\n", script);
         free(script);
         //argument given to the shell script
-        //input_arguments = argv + 2;
+        input_args = argv + 2;
     }
     //script given directly as parameter
     else if (argc >= 3 && !strcmp(argv[1], "-c"))
     {
         tokens = lexer(argv[2]);
-        //input_arguments = argv + 3;
+        input_args = argv + 3;
     }
     else
     {
@@ -113,7 +115,7 @@ int main(int argc, char **argv)
     
     // exec script if no error
     if (!res)
-        main_exec(ast);
+        main_exec(ast, input_args);
 
     free_lexer(tokens);
     free_ast(ast);

@@ -5,12 +5,10 @@
 #include "../parser/parser.h"
 #include "../variable/variable.h"
 
-#ifndef VARLIST
-#define VARLIST
 extern struct variable_list *var_list;
-#endif
+extern char **input_arguments;
 
-int main_exec(struct Node *ast);
+int main_exec(struct Node *ast, char **input_args);
 int node_type(struct Node *ast);
 
 #endif /* !EXEC_H */

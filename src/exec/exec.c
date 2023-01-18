@@ -5,6 +5,7 @@
 #include <string.h>
 
 struct variable_list *var_list;
+char **input_arguments;
 
 int process_variable(struct Node *ast)
 {
@@ -193,10 +194,11 @@ int node_type(struct Node *ast)
     return r;
 }
 
-int main_exec(struct Node *ast)
+int main_exec(struct Node *ast, char **input_args)
 {
     var_list = calloc(1, sizeof(struct variable_list));
     var_list->size = 0;
     var_list->list = NULL;
+    input_arguments = input_args;
     return node_type(ast);
 }
