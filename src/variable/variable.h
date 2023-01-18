@@ -10,12 +10,12 @@ struct variable_list
 struct variable
 {
     char *name;
-    char *value;
+    char **value;
 };
 
 char **find_value(struct variable_list *list, char *name);
-void modify_value(struct variable_list *list, char *name, char **value);
+void modify_value(struct variable_list *list, char *name, char *value);
 void free_list(struct variable_list *list);
 
-char **expand_variables(char *str);
+char *expand_variables(char *str);
 #endif /* !VARIABLE_H */
