@@ -11,10 +11,10 @@ int process_variable(struct Node *ast)
     if (ast->value == NULL)
         return 2;
     char *save;
-    char *prefix = strtok_r(ast->value, "= ()", &save);
+    char *prefix = strtok_r(ast->value, "= ", &save);
     if (prefix == NULL)
         return 2;
-    char *val = strtok_r(NULL, "= ()", &save);
+    char *val = strtok_r(NULL, "= ", &save);
     if (val == NULL)
         return 2;
     modify_value(var_list, prefix, val);

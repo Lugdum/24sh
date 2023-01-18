@@ -55,7 +55,6 @@ char *file_to_char(char *file)
 int main(int argc, char **argv)
 {
     int res = 1;
-
     struct Token *tokens;
     
     //load token from diff sources
@@ -79,10 +78,15 @@ int main(int argc, char **argv)
         tokens = lexer(script);
         //printf("%s\n", script);
         free(script);
+        //argument given to the shell script
+        //input_arguments = argv + 2;
     }
     //script given directly as parameter
     else if (argc >= 3 && !strcmp(argv[1], "-c"))
-            tokens = lexer(argv[2]);
+    {
+        tokens = lexer(argv[2]);
+        //input_arguments = argv + 3;
+    }
     else
     {
         fprintf(stderr, "Wrong arguments\n");

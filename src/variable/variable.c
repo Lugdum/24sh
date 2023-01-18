@@ -1,4 +1,5 @@
 #include "variable.h"
+#include "../exec/exec.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +11,7 @@ char *find_value(struct variable_list *list, char *name)
         if (!strcmp(name, list->list[i].name))
             return list->list[i].value;
     }
-    return NULL;
+    return "";
 }
 void insert_value(struct variable_list *list, char *name, char *value)
 {
@@ -26,7 +27,7 @@ void insert_value(struct variable_list *list, char *name, char *value)
 }
 void modify_value(struct variable_list *list, char *name, char *value)
 {
-    if (find_value(list, name) != NULL)
+    if (!strcmp("", find_value(list, name)) && !strcmp("", value))
     {
     for (int i = 0; i < list->size; i++)
     {
@@ -51,4 +52,53 @@ void free_list(struct variable_list *list)
     }
     free(list->list);
     free(list);
+}
+
+char *expand_variables(char *str)
+{
+    int size = strlen(str);
+    char *r = calloc(size, 1);
+    int quot = 0;
+    int j = 0;
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] == '\'' && (i == 0 || str[i - 1] != '\''))
+        {
+            quot = !quot;
+        }
+        else if (!quot && str[i] == '$')
+        {
+            int tmp = i + 1;
+            char *word;
+            //get var name
+            while (str[i] != 0 && str[i] != ' ' && str[i] != '\'')
+                i++;
+            //if no name
+            if (i == tmp)
+                word ="$";
+            else
+            {
+                char *var_name = calloc(i - tmp + 2, 1);
+                var_name = strncpy(var_name, str + tmp, i - tmp);
+                if (!strcmp("@", var_name))
+                    //TODO
+                    break;
+                else
+                    word = find_value(var_list, var_name);
+                free(var_name);
+            }
+
+            //copy var value to return string
+            r = realloc(r, size + strlen(word));
+            strcpy(r + j, word);
+            j += strlen(word);
+        }
+        else
+        {
+            r[j] = str[i];
+            j++;
+        }
+
+    }
+    return r;
 }

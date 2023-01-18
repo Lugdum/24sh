@@ -28,6 +28,7 @@ struct Token
 {
     enum TokenType type;
     char *value;
+    int single_quoted;
     struct Token *next;
 };
 

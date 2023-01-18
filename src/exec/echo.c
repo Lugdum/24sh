@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 int echo(struct Node *ast, int fd)
 {
@@ -54,19 +55,13 @@ int echo(struct Node *ast, int fd)
     {
             // Remplace les séquences d'échappement précédées de \ par leurs
             // équivalents ASCII
-            for (int j = 0; ast->children[i]->value[j] != '\0'; j++)
+        char *value = expand_variables(ast->children[i]->value);
+            for (int j = 0; value[j] != '\0'; j++)
             {
-                if (ast->children[i]->value[j] == '$')
+                 
+                if (value[j] == '\\' && !flag_E && flag_e)
                 {
-                    char *var = ast->children[i]->value + 1;
-                    char *word = find_value(var_list, var);
-                    printf("%s", word);
-                    j = strlen(ast->children[i]->value) - 1;
-                    continue;
-                }
-                if (ast->children[i]->value[j] == '\\' && !flag_E && flag_e)
-                {
-                    switch (ast->children[i]->value[j + 1])
+                    switch (value[j + 1])
                     {
                     case 'a':
                         putchar('\a');
@@ -90,13 +85,13 @@ int echo(struct Node *ast, int fd)
                         putchar('\v');
                         break;
                     default:
-                        putchar(ast->children[i]->value[j]);
+                        putchar(value[j]);
                     }
                     j++;
                 }
                 else
                 {
-                    putchar(ast->children[i]->value[j]);
+                    putchar(value[j]);
                 }
             }
 
@@ -105,6 +100,7 @@ int echo(struct Node *ast, int fd)
         {
             putchar(' ');
         }
+        free(value);
     }
 
     if (!flag_n)

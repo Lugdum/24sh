@@ -100,6 +100,7 @@ struct Token *lexer(char *input)
     char past = 0;
     while (i < len)
     {
+        //if # at the start of line then whole line is comment
         if (input[i] == '#' && past == '\n')
         {
             while (input[i] != '\n')
@@ -107,17 +108,25 @@ struct Token *lexer(char *input)
             i++;
             continue;
         }
-        if (input[i] == '\"' && input[i-1] != '\\')
+        //if " but no \ then start/end quoting 
+        if ((input[i] == '\"' || input[i] == '\'') && input[i-1] != '\\')
         {
             quote = !quote;
+            if (input[i] == '\'')
+            {
+                cur[j] = input[i];
+                j++;
+            }
             i++;
             continue;
         }
+        //if \ or \r then skip the char
         if ((input[i] == '\\' && !quote) || input[i] == '\r')
         {
             i++;
             continue;
         }
+        //if space ; or \n then end token exept if quoted
         if (input[i] == ' ' || input[i] == ';' || input[i] == '\n')
         {
             if (!quote)
