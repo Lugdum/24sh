@@ -42,6 +42,8 @@ struct Token *process(char *str, struct Token *tok)
         token->type = PIPE;
     else if (!strcmp(";", str))
         token->type = SC;
+    else if (!strcmp("!", str))
+        token->type = EM;
     else if (!strcmp("{", str))
         token->type = B_OP;
     else if (!strcmp("}", str))
@@ -213,6 +215,9 @@ void print_token(struct Token *token)
             break;
         case SC:
             printf("; ");
+            break;
+        case EM:
+            printf("! ");
             break;
         case B_OP:
             printf("{ ");
