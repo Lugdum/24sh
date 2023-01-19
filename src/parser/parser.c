@@ -9,7 +9,7 @@ int parse(struct Token *token, struct Node **ast)
 {
     // Cas d'erreur
     if (token == NULL || token->type == EF || token->type == NL)
-        return 0;
+    return 0;
 
     // Parser
     int res = parseList(&token, ast);
@@ -17,8 +17,45 @@ int parse(struct Token *token, struct Node **ast)
     // On est bon
     if (token->type == EF || token->type == NL)
         return res;
-
+    else if(token->type == B_OP)
+        res = parseBlockCommand(&token, ast);
+    
     // Erreur de syntax
+    return 2;
+}
+
+
+int parseBlockCommand(struct Token **token, struct Node **ast)
+{
+    // Skip '{'
+    (*token) = (*token)->next;
+    struct Node *block = calloc(1, sizeof(struct Node));
+    if (block == NULL)
+        return 1;
+    block->type = AST_BLOCK;
+    block->children = calloc(1, sizeof(struct Node *));
+    if (block->children == NULL)
+        goto error;
+
+    // parse commands in block
+    int res = parseList(token, ast);
+    block->children[0] = *ast;
+    block->nb_children = 1;
+    if(res)
+        return res;
+
+    // check for '}'
+    if((*token)->type != B_CL)
+        return 2;
+    // Skip '}'
+    (*token) = (*token)->next;
+
+    *ast = block;
+    return res;
+
+error:
+    free(block->children);
+    free(block);
     return 2;
 }
 
@@ -34,7 +71,7 @@ int parseList(struct Token **token, struct Node **ast)
     if (*token == NULL)
         return 0;
 
-    // Creer le noeud liste blabla
+    // Creer le noeud liste
     struct Node *list = calloc(1, sizeof(struct Node));
     if (list == NULL)
         return 1;
@@ -47,15 +84,21 @@ int parseList(struct Token **token, struct Node **ast)
 
     // S'il y a plusieurs trucs
     int i = 1;
-    while (*token != NULL && (*token)->type == SC && !res)
+    while (*token != NULL && (*token)->type == SC)
     {
-        // Skip ';'
-        (*token) = (*token)->next;
-        if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI)
-            break;
-        parseAndOr(token, ast);
-        list->children =
-            realloc(list->children, (i + 1) * sizeof(struct Node *));
+        if ((*token)->type == SC)
+        {
+            // Skip ';'
+            (*token) = (*token)->next;
+            if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI)
+                break;
+            res = parseAndOr(token, ast);
+        }
+        else if((*token)->type == B_OP)
+            res = parseBlockCommand(token, ast);
+        else
+            return 2;
+        list->children = realloc(list->children, (i + 1) * sizeof(struct Node *));
         list->nb_children += 1;
         if (list->children == NULL)
             goto error;

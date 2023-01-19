@@ -19,6 +19,8 @@ enum TokenType
     EF,
     NL,
     PIPE,
+    B_OP,
+    B_CL,
     SC,
     EM,
     SQ,

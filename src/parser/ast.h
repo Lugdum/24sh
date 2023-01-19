@@ -16,7 +16,8 @@ enum ast_type
     AST_FOR,
     AST_WHILE,
     AST_UNTIL,
-    AST_EM
+    AST_EM,
+    AST_BLOCK
 };
 
 struct Node
