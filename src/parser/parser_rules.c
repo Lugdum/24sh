@@ -30,6 +30,8 @@ int parseIf(struct Token **token, struct Node **if_node)
         goto error;
 
     (*token) = (*token)->next;
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
 
     // Faire le then
     (*if_node)->children = realloc((*if_node)->children, 2 * sizeof(struct Node *));
