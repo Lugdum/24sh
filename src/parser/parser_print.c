@@ -74,6 +74,9 @@ void print_node(struct Node *node, int parent, FILE *f)
     case AST_EM:
         fprintf(f, "node%d [label=\"! PIPELINE\"];\n", current_node);
         break;
+    case AST_BLOCK:
+        fprintf(f, "node%d [label=\"BLOCK\"];\n", current_node);
+        break;
     default:
         fprintf(f, "node%d [label=\"UNKNOWN\"];\n", current_node);
         break;

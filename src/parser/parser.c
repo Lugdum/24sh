@@ -17,8 +17,8 @@ int parse(struct Token *token, struct Node **ast)
     // On est bon
     if (token->type == EF || token->type == NL)
         return res;
-    else if(token->type == B_OP)
-        res = parseBlockCommand(&token, ast);
+    /*else if(token->type == B_OP)
+        res = parseBlockCommand(&token, ast);*/
     
     // Erreur de syntax
     return 2;
@@ -62,7 +62,7 @@ error:
 
 // Parser les listes
 int parseList(struct Token **token, struct Node **ast)
-{
+{        
     // Parser le premier élément de la liste
     int res = parseAndOr(token, ast);
     if (res)
@@ -90,7 +90,7 @@ int parseList(struct Token **token, struct Node **ast)
         {
             // Skip ';'
             (*token) = (*token)->next;
-            if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI)
+            if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI || (*token)->type == B_CL)
                 break;
             res = parseAndOr(token, ast);
         }
@@ -108,6 +108,10 @@ int parseList(struct Token **token, struct Node **ast)
     }
 
     *ast = list;
+
+    if ((*token)->type == B_OP && parseBlockCommand(token, ast))
+        return 2;
+
     return res;
 
 error:
