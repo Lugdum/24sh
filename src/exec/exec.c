@@ -302,7 +302,5 @@ int main_exec(struct Node *ast, char **input_args)
     int r = node_type(ast);
 
     free_list(var_list);
-    if (r == TRUE || r == FALSE)
-        return 0;
     return r;
 }
