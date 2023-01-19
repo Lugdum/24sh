@@ -166,7 +166,10 @@ int process_and(struct Node *ast)
     int r = node_type(ast->children[1]);
     if (r == ERROR)
         return ERROR;
-    return (l == TRUE) && (r == TRUE);
+    r = ((l == TRUE) && (r == TRUE));
+    if (r)
+        return TRUE;
+    return FALSE;
 }
 
 int process_or(struct Node *ast)
@@ -177,7 +180,10 @@ int process_or(struct Node *ast)
     int r = node_type(ast->children[1]);
     if (r == ERROR)
         return ERROR;
-    return (l == TRUE) || (r == TRUE);
+    r = ((l == TRUE) || (r == TRUE));
+    if (r)
+        return TRUE;
+    return FALSE;
 }
 
 int process_pipeline(struct Node *ast)
