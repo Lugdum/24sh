@@ -187,6 +187,17 @@ int process_pipeline(struct Node *ast)
         r = node_type(ast->children[1]);
     return r;
 }
+int process_em(struct Node *ast)
+{
+    int r = node_type(ast->children[0]);
+    if (ast->nb_children == 2)
+        r = node_type(ast->children[1]);
+    if (r == 1)
+        r = 0;
+    else if (r == 0)
+        r = 1;
+    return r;
+}
 int node_type(struct Node *ast)
 {
     int r = 0;
@@ -224,6 +235,9 @@ int node_type(struct Node *ast)
         break;
     case AST_PIPELINE:
         r = process_pipeline(ast);
+        break;
+    case AST_EM:
+        r = process_em(ast);
         break;
     default:
         printf("Unknown Node type\n");

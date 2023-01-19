@@ -1,0 +1,10 @@
+a="aa bb cc dd ee"
+for i in $a
+do
+    echo $i
+done
+echo '____'
+for i in "$a"
+do
+    echo $i
+done
