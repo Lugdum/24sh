@@ -1,4 +1,5 @@
 #include "variable.h"
+#include "special_variable.h"
 #include "../exec/exec.h"
 
 #include <stdlib.h>
@@ -38,6 +39,8 @@ void insert_value(struct variable_list *list, char *name, char **value)
 }
 void modify_value(struct variable_list *list, char *name, char *value)
 {
+    if (value == NULL || value[0] == '\0')
+        return;
     char **tmp = malloc(2 * sizeof(char *));
     tmp[0] = value;
     tmp[1] = NULL;
@@ -46,6 +49,8 @@ void modify_value(struct variable_list *list, char *name, char *value)
 }
 void modify_value_multiple(struct variable_list *list, char *name, char **value)
 {
+    if (value[0] == NULL)
+        return;
     if (find_value(list, name))
     {
     for (int i = 0; i < list->size; i++)
@@ -85,19 +90,20 @@ char *get_string(char **var)
     int k = 0;
     while (var[k])
     {
-        r = realloc(r, len + strlen(var[k]) + 1);
+        r = realloc(r, 1 + len + strlen(var[k]));
         strcpy(r + len, var[k]);
         len += strlen(var[k]);
+        r[len] = ' ';
+        len++;
         k++;
     }
-    r = realloc(r, len + 1);
-    r[len] = '\0';
+    r[len - 1] = '\0';
     return r;
 }
 
 char **expand_variables(char *str)
 {
-    int size_cur = strlen(str);
+    int size_cur = strlen(str) + 1;
     char *cur = calloc(size_cur, 1);
 
     int size_ret = 0;
@@ -134,10 +140,13 @@ char **expand_variables(char *str)
     }
     if (!is_var)
     {
-        ret = malloc(sizeof(char *));
-        ret[size_ret] = cur;
+        cur[j] = '\0';
+        ret = malloc(sizeof(char *) * 2);
+        ret[0] = cur;
+        ret[1] = NULL;
         return ret;
     }
+
     int tmp = i + 1;
     char **var_value;
     int free_word = 0;
@@ -152,9 +161,14 @@ char **expand_variables(char *str)
     {
         char *var_name = calloc(i - tmp + 2, 1);
         var_name = strncpy(var_name, str + tmp, i - tmp);
-        
         var_value = find_value(var_list, var_name);
-        if (!var_value)
+        
+        if (!strcmp(var_name, "RANDOM") || !strcmp(var_name, "(RANDOM)"))
+        {
+            word = expand_random();
+            free_word = 1;
+        }
+        else if (!var_value)
         {
             word = "";
         }
@@ -174,8 +188,9 @@ char **expand_variables(char *str)
     cur = realloc(cur, size_cur + strlen(word));
     strcpy(cur + j, word);
     
-    ret = malloc(sizeof(char *));
-    ret[size_ret] = cur;
+    ret = malloc(sizeof(char *) * 2);
+    ret[0] = cur;
+    ret[1] = NULL;
     
     if (free_word)
         free(word);
@@ -186,7 +201,9 @@ char **expand_variables(char *str)
     while (var_value[var_i])
     {
         char *save;
-        word = strtok_r(var_value[var_i], " ", &save);
+        char *tmp = malloc(strlen(var_value[var_i]) + 1);
+        strcpy(tmp, var_value[var_i]);
+        word = strtok_r(tmp, " ", &save);
         if (size_ret == 0)
         {
             ret[size_ret] = realloc(ret[size_ret], strlen(word) + strlen(ret[size_ret]) + 1);
@@ -203,6 +220,7 @@ char **expand_variables(char *str)
             size_ret++;
         }
         var_i++;
+        free(tmp);
     }
     ret = realloc(ret, sizeof(char *) * (size_ret + 1));
     ret[size_ret] = NULL;

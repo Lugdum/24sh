@@ -1,8 +1,10 @@
 #include "exec.h"
 #include "../variable/variable.h"
+#include "../variable/special_variable.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 
 struct variable_list *var_list;
@@ -230,15 +232,58 @@ int node_type(struct Node *ast)
     return r;
 }
 
+void comput_special_variables()
+{
+    char **temp = expand_at();
+    modify_value_multiple(var_list, "@", temp);
+    int i = 0;
+    while (temp[i])
+    {
+        free(temp[i]);
+        i++;
+    }
+    free(temp);
+    char *tmp;
+    for (i = 0; i < 9; i++)
+    {
+        char buffer[100];
+        sprintf(buffer, "%d", i + 1);
+        tmp = expand_n(i);
+        modify_value(var_list, buffer, tmp);
+        free(tmp);
+    }
+    
+    tmp = expand_star();
+    modify_value(var_list, "*", tmp);
+    free(tmp);
+    tmp = expand_question_mark();
+    modify_value(var_list, "?", tmp);
+    free(tmp);
+    tmp = expand_dollar();
+    modify_value(var_list, "$", tmp);
+    free(tmp);
+    tmp = expand_sharp();
+    modify_value(var_list, "#", tmp);
+    free(tmp);
+    tmp = expand_uid();
+    modify_value(var_list, "UID", tmp);
+    free(tmp);
+    tmp = expand_pwd();
+    modify_value(var_list, "PWD", tmp);
+    free(tmp);
+
+    srand(time(NULL));
+}
+
 int main_exec(struct Node *ast, char **input_args)
 {
     var_list = calloc(1, sizeof(struct variable_list));
     var_list->size = 0;
     var_list->list = NULL;
     input_arguments = input_args;
-    exit_status = 0;
+    exit_status = 0;    
     
-    
+    comput_special_variables();
 
     int r = node_type(ast);
 

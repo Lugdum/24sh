@@ -51,6 +51,9 @@ int echo(struct Node *ast, int fd)
             word = 1;
     }
 
+    char *to_print = NULL;
+    int len = 0;
+    char to_add = 0;
     for (int i = son; i < ast->nb_children; i++)
     {
             // Remplace les séquences d'échappement précédées de \ par leurs
@@ -64,43 +67,62 @@ int echo(struct Node *ast, int fd)
                     switch (value[j + 1])
                     {
                     case 'a':
-                        putchar('\a');
+                        to_add = '\a';
                         break;
                     case 'b':
-                        putchar('\b');
+                        to_add = '\b';
                         break;
                     case 'f':
-                        putchar('\f');
+                        to_add = '\f';
                         break;
                     case 'n':
-                        putchar('\n');
+                        to_add = '\n';
                         break;
                     case 'r':
-                        putchar('\r');
+                        to_add = '\r';
                         break;
                     case 't':
-                        putchar('\t');
+                        to_add = '\t';
                         break;
                     case 'v':
-                        putchar('\v');
+                        to_add = '\v';
                         break;
                     default:
-                        putchar(value[j]);
+                        to_add = value[j];
                     }
                     j++;
                 }
                 else
                 {
-                    putchar(value[j]);
+                    to_add = value[j];
                 }
+                to_print = realloc(to_print, len + 1);
+                to_print[len] = to_add;
+                to_add = 0;
+                len++;
             }
 
         // Ajoute un espace entre chaque argument, sauf pour le dernier
         if (i < ast->nb_children - son)
         {
-            putchar(' ');
+                to_print = realloc(to_print, len + 1);
+                to_print[len] = ' ';
+                to_add = 0;
+                len++;
         }
         free(value);
+    }
+    if (len > 0)
+    {
+        if (to_print[len - 1] == ' ')
+            to_print[len - 1] = '\0';
+        else
+        {
+            to_print = realloc(to_print, len + 1);
+            to_print[len] = '\0';
+        }
+        printf("%s", to_print);
+        free(to_print);
     }
 
     if (!flag_n)
