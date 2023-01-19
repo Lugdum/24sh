@@ -66,26 +66,14 @@ int echo(struct Node *ast, int fd)
                 {
                     switch (value[j + 1])
                     {
-                    case 'a':
-                        to_add = '\a';
-                        break;
-                    case 'b':
-                        to_add = '\b';
-                        break;
-                    case 'f':
-                        to_add = '\f';
+                    case '\\':
+                        to_add = '\\';
                         break;
                     case 'n':
                         to_add = '\n';
                         break;
-                    case 'r':
-                        to_add = '\r';
-                        break;
                     case 't':
                         to_add = '\t';
-                        break;
-                    case 'v':
-                        to_add = '\v';
                         break;
                     default:
                         to_add = value[j];
