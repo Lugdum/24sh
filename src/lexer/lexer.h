@@ -24,7 +24,8 @@ enum TokenType
     SC,
     EM,
     SQ,
-    WORD
+    WORD,
+    LS,
 };
 
 struct Token
