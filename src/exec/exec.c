@@ -14,16 +14,16 @@ int exit_status;
 int process_variable(struct Node *ast)
 {
     if (ast->value == NULL)
-        return 2;
+        return ERROR;
     char *save;
     char *prefix = strtok_r(ast->value, "=", &save);
     if (prefix == NULL)
-        return 2;
+        return ERROR;
     char *val = strtok_r(NULL, "=\"\'", &save);
     if (val == NULL)
-        return 2;
+        return ERROR;
     modify_value(var_list, prefix, val);
-    return 1;
+    return TRUE;
 }
 
 int exec_command(struct Node *ast)
@@ -34,35 +34,35 @@ int exec_command(struct Node *ast)
     }
     else if (!strcmp(ast->children[0]->value, "true"))
     {
-        return 1;
+        return TRUE;
     }
     else if (!strcmp(ast->children[0]->value, "false"))
     {
-        return 0;
+        return FALSE;
     }
     else
     {
         return process_variable(ast->children[0]);
     }
-    return 1;
+    return TRUE;
 }
 
 int process_if(struct Node *ast)
 {
-    if (node_type(ast->children[0]))
+    if (node_type(ast->children[0]) == TRUE)
         return node_type(ast->children[1]);
     else
     {
         if (ast->nb_children == 3)
             return node_type(ast->children[2]);
         else
-            return 0;
+            return FALSE;
     }
 }
 
 int process_for(struct Node *ast)
 {
-    int r = 1;
+    int r = TRUE;
     //TODO SUPR afer exit for
     struct Node *tmp = ast->children[0]->children[0]->children[0];
     for (int i = 0; i < tmp->nb_children; i++)
@@ -74,7 +74,7 @@ int process_for(struct Node *ast)
             modify_value(var_list, ast->value, expanded[j]);
             r = node_type(ast->children[1]);
             //error
-            if (r == 2)
+            if (r == ERROR)
             {
                 int k = 0;
                 while (expanded[k])
@@ -83,7 +83,7 @@ int process_for(struct Node *ast)
                     k++;
                 }
                 free(expanded);
-                return 2;
+                return ERROR;
             }
             j++;
         }
@@ -101,36 +101,36 @@ int process_for(struct Node *ast)
 
 int process_while(struct Node *ast)
 {
-    int r = 1;
-    while (node_type(ast->children[0]))
+    int r = TRUE;
+    while (node_type(ast->children[0]) == TRUE)
     {
         r = node_type(ast->children[1]);
-        if (r == 2)
-            return 2;
+        if (r == ERROR)
+            return ERROR;
     }
     return r;
 }
 int process_until(struct Node *ast)
 {
-    int r = 1;
-    while (!node_type(ast->children[0]))
+    int r = TRUE;
+    while (node_type(ast->children[0]) == FALSE)
     {
         r = node_type(ast->children[1]);
-        if (r == 2)
-            return 2;
+        if (r == ERROR)
+            return ERROR;
     }
     return r;
 }
 int process_cmd(struct Node *ast)
 {
-    int r = 1;
+    int r = TRUE;
     for (int i = 0; i < ast->nb_children; i++)
     {
         if (ast->children[i]->type == AST_SIMPLE_COMMAND)
         {
             r = node_type(ast->children[i]);
-            if (r == 2)
-                return 2;
+            if (r == ERROR)
+                return ERROR;
         }
     }
     return r;
@@ -138,12 +138,12 @@ int process_cmd(struct Node *ast)
 
 int process_list(struct Node *ast)
 {
-    int r = 0;
+    int r = TRUE;
     for (int i = 0; i < ast->nb_children; i++)
     {
         r = node_type(ast->children[i]);
-        if (r == 2)
-            return 2;
+        if (r == ERROR)
+            return ERROR;
     }
     return r;
 }
@@ -152,8 +152,8 @@ int process_pipe(struct Node *ast)
 {
     // int fd = -1;
     int r = node_type(ast->children[0]);
-    if (r == 2)
-        return 2;
+    if (r == ERROR)
+        return ERROR;
     r = node_type(ast->children[1]);
     return r;
 }
@@ -161,23 +161,23 @@ int process_pipe(struct Node *ast)
 int process_and(struct Node *ast)
 {
     int l = node_type(ast->children[0]);
-    if (l == 2)
-        return 2;
+    if (l == ERROR)
+        return ERROR;
     int r = node_type(ast->children[1]);
-    if (r == 2)
-        return 2;
-    return l && r;
+    if (r == ERROR)
+        return ERROR;
+    return (l == TRUE) && (r == TRUE);
 }
 
 int process_or(struct Node *ast)
 {
     int l = node_type(ast->children[0]);
-    if (l == 2)
-        return 2;
+    if (l == ERROR)
+        return ERROR;
     int r = node_type(ast->children[1]);
-    if (r == 2)
-        return 2;
-    return l || r;
+    if (r == ERROR)
+        return ERROR;
+    return (l == TRUE) || (r == TRUE);
 }
 
 int process_pipeline(struct Node *ast)
@@ -192,15 +192,15 @@ int process_em(struct Node *ast)
     int r = node_type(ast->children[0]);
     if (ast->nb_children == 2)
         r = node_type(ast->children[1]);
-    if (r == 1)
-        r = 0;
-    else if (r == 0)
-        r = 1;
+    if (r == TRUE)
+        r = FALSE;
+    else if (r == FALSE)
+        r = TRUE;
     return r;
 }
 int node_type(struct Node *ast)
 {
-    int r = 0;
+    int r = FALSE;
     switch (ast->type)
     {
     case AST_INPUT:
@@ -241,7 +241,7 @@ int node_type(struct Node *ast)
         break;
     default:
         printf("Unknown Node type\n");
-        r = 2;
+        r = ERROR;
     }
     return r;
 }
@@ -302,7 +302,7 @@ int main_exec(struct Node *ast, char **input_args)
     int r = node_type(ast);
 
     free_list(var_list);
-    if (r == 0 || r == 1)
+    if (r == TRUE || r == FALSE)
         return 0;
     return r;
 }

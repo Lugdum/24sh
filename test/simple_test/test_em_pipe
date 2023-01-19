@@ -1,0 +1,6 @@
+if ! true
+then
+    echo nope
+else
+    echo yeap
+fi
