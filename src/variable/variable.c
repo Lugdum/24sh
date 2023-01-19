@@ -159,8 +159,10 @@ char **expand_variables(char *str)
         word ="$";
     else
     {
-        char *var_name = calloc(i - tmp + 2, 1);
-        var_name = strncpy(var_name, str + tmp, i - tmp);
+        char *tmp_var_name = calloc(i - tmp + 2, 1);
+        tmp_var_name = strncpy(tmp_var_name, str + tmp, i - tmp);
+        char *tmp_trash;
+        char *var_name = strtok_r(tmp_var_name, "{}", &tmp_trash);
         var_value = find_value(var_list, var_name);
         
         if (!strcmp(var_name, "RANDOM") || !strcmp(var_name, "(RANDOM)"))
@@ -182,7 +184,7 @@ char **expand_variables(char *str)
             word = "";
             is_cutted = 1;
         }
-        free(var_name);
+        free(tmp_var_name);
     }
     //copy var value to return string if quoted
     cur = realloc(cur, size_cur + strlen(word));

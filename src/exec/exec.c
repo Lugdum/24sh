@@ -300,7 +300,7 @@ int main_exec(struct Node *ast, char **input_args)
     comput_special_variables();
 
     int r = node_type(ast);
-    if (t == TRUE || r == FALSE)
+    if (r == TRUE || r == FALSE)
         r = 0;
     free_list(var_list);
     return r;
