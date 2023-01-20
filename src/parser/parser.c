@@ -87,18 +87,14 @@ int parseList(struct Token **token, struct Node **ast)
     int i = 1;
     while (*token != NULL && (*token)->type == SC)
     {
-        if ((*token)->type == SC)
-        {
-            // Skip ';'
+        // Skip ';'s
+        while ((*token)->type == SC || (*token)->type == NL)
             (*token) = (*token)->next;
-            if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI || (*token)->type == B_CL)
-                break;
-            res = parseAndOr(token, ast);
-        }
-        else if((*token)->type == B_OP)
-            res = parseBlockCommand(token, ast);
-        else
-            return 2;
+
+        if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI || (*token)->type == B_CL)
+            break;
+        res = parseAndOr(token, ast);
+
         list->children = realloc(list->children, (i + 1) * sizeof(struct Node *));
         list->nb_children += 1;
         if (list->children == NULL)
