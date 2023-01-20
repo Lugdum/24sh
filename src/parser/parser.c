@@ -177,9 +177,6 @@ int parseAndOr(struct Token **token, struct Node **ast)
     // Parser le premier élément de AND_OR
     if (((*token)->type == WORD || (*token)->type == EM))
         res = parsePipeline(token, ast);
-    
-    if (*token == NULL || !res)
-        return res;
 
     // S'il y a plusieurs trucs
     while (*token != NULL && ((*token)->type == AND || (*token)->type == OR))
