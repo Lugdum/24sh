@@ -12,7 +12,8 @@ void prettyprint(struct Node *ast, FILE *f)
     printf("AST:\n");
     fprintf(f, "digraph ast {\n");
     fprintf(f, "node [shape=box];\n");
-    print_node(ast, 0, f);
+    if (ast)
+        print_node(ast, 0, f);
     fprintf(f, "}\n");
 }
 
@@ -21,7 +22,8 @@ void sexyprint(struct Node *ast)
     FILE *f = fopen("./graph", "w");
     fprintf(f, "digraph ast {\n");
     fprintf(f, "node [shape=box];\n");
-    print_node(ast, 0, f);
+    if (ast)
+        print_node(ast, 0, f);
     fprintf(f, "}\n");
     fclose(f);
 }
@@ -76,6 +78,12 @@ void print_node(struct Node *node, int parent, FILE *f)
         break;
     case AST_BLOCK:
         fprintf(f, "node%d [label=\"BLOCK\"];\n", current_node);
+        break;
+    case AST_FUNCTION:
+        fprintf(f, "node%d [label=\"FUNCTION\n%s\"];\n", current_node, node->function->name);
+        break;
+    case AST_CRET_FUNC:
+        fprintf(f, "node%d [label=\"CREATE FUNCTION\"];\n", current_node);
         break;
     default:
         fprintf(f, "node%d [label=\"UNKNOWN\"];\n", current_node);

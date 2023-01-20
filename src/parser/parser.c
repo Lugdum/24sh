@@ -1,15 +1,18 @@
 #include "parser.h"
+#include "function.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+extern struct Function *functions;
 
 // Fonction principale
 int parse(struct Token *token, struct Node **ast)
 {
     // Cas d'erreur
     if (token == NULL || token->type == EF || token->type == NL)
-    return 0;
+        return 0;
 
     // Parser
     int res = parseList(&token, ast);
@@ -17,8 +20,6 @@ int parse(struct Token *token, struct Node **ast)
     // On est bon
     if (token->type == EF || token->type == NL)
         return res;
-    /*else if(token->type == B_OP)
-        res = parseBlockCommand(&token, ast);*/
     
     // Erreur de syntax
     return 2;
@@ -167,16 +168,17 @@ int parseEM(struct Token **token, struct Node **ast)
 // Parser les conditions AND OR
 int parseAndOr(struct Token **token, struct Node **ast)
 {
+    int res = 0;
+
     // Parser les rules ou les ! s'il y en a
     if (parseRule(token, ast))
         return 2;
 
     // Parser le premier élément de AND_OR
-    if (((*token)->type == WORD || (*token)->type == EM) && parsePipeline(token, ast))
-        return 2;
+    if (((*token)->type == WORD || (*token)->type == EM))
+        res = parsePipeline(token, ast);
     
-    int res = 0;
-    if (*token == NULL)
+    if (*token == NULL || !res)
         return res;
 
     // S'il y a plusieurs trucs
@@ -281,36 +283,38 @@ int parsePipeline(struct Token **token, struct Node **ast)
 // Parser les commandes
 int parseCommand(struct Token **token, struct Node **ast)
 {
-    *ast = calloc(1, sizeof(struct Node));
-    if (*ast == NULL)
+    struct Node *command = calloc(1, sizeof(struct Node));
+    if (command == NULL)
         return 2;
 
     // Parser le premier element de la commande
-    (*ast)->children = calloc(1, sizeof(struct Node *));
-    if ((*ast)->type != AST_EM)
-        (*ast)->type = AST_COMMAND;
-    if ((*ast)->children == NULL)
+    (command)->children = calloc(1, sizeof(struct Node *));
+    (command)->type = AST_COMMAND;
+    if ((command)->children == NULL)
         goto error;
-    parseSimpleCommand(token, &(*ast)->children[0]);
-    if (!(*ast)->children[0])
+    parseSimpleCommand(token, &(command)->children[0]);
+    if (!(command)->children[0])
         goto error;
-    (*ast)->nb_children = 1;
+    (command)->nb_children = 1;
 
-    // S'il y a plusieurs trucs
-    int i = 1;
-    while (*token != NULL && (*token)->type > SC)
+    char **word = &command->children[0]->children[0]->value;
+    if (strlen(*word) > 1 && (*word)[strlen(*word) - 2] == '(' && (*word)[strlen(*word) - 1] == ')')
     {
-        (*token) = (*token)->next;
-        if ((*token)->type == SC || (*token)->type == NL)
-            (*token) = (*token)->next;
-        (*ast)->children = realloc((*ast)->children, (i + 1) * sizeof(struct Node *));
-        if ((*ast)->children == NULL)
-            goto error;
-        parseSimpleCommand(token, &(*ast)->children[i]);
-        (*ast)->nb_children += 1;
-
-        i++;
+        struct Function *found = findFunction(*word);
+        if (!found)
+        {
+            parseFunction(token, *word);
+            command->type = AST_CRET_FUNC;
+        }
+        else
+        {
+            command->function = found;
+            command->type = AST_FUNCTION;
+        }
+        free_ast(command->children[0]);
+        command->nb_children = 0;
     }
+    *ast = command;
 
     return 0;
 

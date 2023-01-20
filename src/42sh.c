@@ -13,6 +13,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+extern struct Function *functions;
+
 char *file_to_char(char *file)
 {
     char *script = malloc(sizeof(char)), *line = NULL;
@@ -114,10 +116,11 @@ int main(int argc, char **argv)
         sexyprint(ast);
     
     // exec script if no error
-    if (!res)
+    if (!res && ast)
         res = main_exec(ast, input_args);
 
     free_lexer(tokens);
     free_ast(ast);
+    free_functions(functions);
     return res;
 }

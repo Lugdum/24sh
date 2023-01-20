@@ -21,6 +21,8 @@ enum TokenType
     PIPE,
     B_OP,
     B_CL,
+    LP,
+    RP,
     SC,
     EM,
     SQ,
