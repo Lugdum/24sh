@@ -65,8 +65,6 @@ if __name__ == "__main__":
             perform_checks (sh_ref, sh_proc)
         except AssertionError as err:
             print(f"{KO_TAG} {file}\n{err}")
-            print(sh_proc)
-            print(sh_ref)
         else:
             print(f"{OK_TAG} {file}\n")
             pass
