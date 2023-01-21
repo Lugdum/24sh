@@ -13,12 +13,19 @@ void no_double(struct Token *tok)
     {
         if (tok->type == SC && pre->type == SC)
         {
+            struct Token *tmp = tok->next;
             pre->next = tok->next;
+            
             free(tok->value);
             free(tok);
+
+            tok = tmp;
         }
-        pre = tok;
-        tok = tok->next;
+        else
+        {
+            pre = tok;
+            tok = tok->next;
+        }
     }
 }
 

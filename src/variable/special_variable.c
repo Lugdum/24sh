@@ -21,7 +21,8 @@ char *expand_star()
         size += 1;
         i++;
     }
-    r[size - 1] = '\0';
+    if (size > 0)
+        r[size - 1] = '\0';
     return r;
 }
 
