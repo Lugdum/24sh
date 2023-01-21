@@ -250,7 +250,7 @@ int parsePipeline(struct Token **token, struct Node **ast)
             (*token) = (*token)->next;
         
         // S'il y a !
-        enum TokenType type = AST_PIPELINE;
+        enum ast_type type = AST_PIPELINE;
         if ((*token)->type == EM)
         {
             (*token) = (*token)->next;
