@@ -174,8 +174,8 @@ int parseWhile(struct Token **token, struct Node **ast)
         goto error;
 
     (*token) = (*token)->next;
-    if ((*token)->type == SC || (*token)->type == NL)
-        (*token) = (*token)->next;
+    /*if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;*/
     return 0;
 
 error:

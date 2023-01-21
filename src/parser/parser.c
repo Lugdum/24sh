@@ -93,13 +93,15 @@ int parseList(struct Token **token, struct Node **ast)
 
         if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI || (*token)->type == B_CL)
             break;
-        res = parseAndOr(token, ast);
+
+        struct Node *tmp = NULL;
+        res = parseAndOr(token, &tmp);
 
         list->children = realloc(list->children, (i + 1) * sizeof(struct Node *));
         list->nb_children += 1;
         if (list->children == NULL)
             goto error;
-        list->children[i] = *ast;
+        list->children[i] = tmp;
 
         i++;
     }
