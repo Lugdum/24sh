@@ -5,6 +5,23 @@
 #include <string.h>
 #include <stdbool.h>
 
+void no_double(struct Token *tok)
+{
+    struct Token *pre = tok;
+    tok = tok->next;
+    while (tok)
+    {
+        if (tok->type == SC && pre->type == SC)
+        {
+            pre->next = tok->next;
+            free(tok->value);
+            free(tok);
+        }
+        pre = tok;
+        tok = tok->next;
+    }
+}
+
 struct Token *process_end_of_file(struct Token *tok)
 {
     struct Token *token = calloc(1, sizeof(struct Token));
@@ -165,6 +182,7 @@ struct Token *lexer(char *input)
     free(cur);
     cur_tok = out->next;
     free(out);
+    no_double(cur_tok);
     return cur_tok;
 }
 
