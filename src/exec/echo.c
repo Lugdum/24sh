@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-int echo(struct Node *ast, int fd)
+int echo(struct Node *ast)
 {
     int flag_n = 0;
     int flag_e = 0;

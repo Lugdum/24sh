@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "lexer/lexer.h"
 #include "parser/parser_print.h"
 #include "parser/parser.h"
@@ -66,9 +68,17 @@ int main(int argc, char **argv)
     if (argc == 1)
     {
         char *buffer = calloc(20000, 1);
-        read(STDIN_FILENO, buffer, 20000);
-        tokens = lexer(buffer);
-        free(buffer);
+        ssize_t rr = read(STDIN_FILENO, buffer, 20000);
+        if (rr > 0)
+        {
+            tokens = lexer(buffer);
+            free(buffer);
+        }
+        else
+        {
+            free(buffer);
+            return 0;
+        }
     }
     //from file
     else if (argc >= 2 && strcmp(argv[1], "-c"))

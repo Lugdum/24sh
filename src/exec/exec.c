@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "exec.h"
 #include "../variable/variable.h"
 #include "../variable/special_variable.h"
@@ -30,7 +31,7 @@ int exec_command(struct Node *ast)
 {
     if (!strcmp(ast->children[0]->value, "echo"))
     {
-        return echo(ast, 1);
+        return echo(ast);
     }
     else if (!strcmp(ast->children[0]->value, "true"))
     {
@@ -150,11 +151,11 @@ int process_list(struct Node *ast)
 
 int process_pipe(struct Node *ast)
 {
-    // int fd = -1;
     int r = node_type(ast->children[0]);
     if (r == ERROR)
         return ERROR;
     r = node_type(ast->children[1]);
+    exit_status = r;
     return r;
 }
 
@@ -202,6 +203,7 @@ int process_em(struct Node *ast)
         r = FALSE;
     else if (r == FALSE)
         r = TRUE;
+    exit_status = r;
     return r;
 }
 int node_type(struct Node *ast)

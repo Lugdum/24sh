@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "variable.h"
 #include "special_variable.h"
 #include "../exec/exec.h"
