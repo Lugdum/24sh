@@ -232,7 +232,14 @@ int parsePipeline(struct Token **token, struct Node **ast)
     else
         pipeline->type = AST_PIPELINE;
     int res = parseCommand(token, &pipeline->children[0]);
-    *ast = pipeline;
+    if (*ast == NULL)
+        *ast = pipeline;
+    else
+    {
+        *ast = realloc(*ast, pipeline->nb_children * sizeof(struct Node *));
+        (*ast)->children[(*ast)->nb_children] = pipeline;
+        (*ast)->nb_children += 1;
+    }
 
     // S'il y a plusieurs trucs
     while (*token != NULL && (*token)->type == PIPE)
@@ -307,7 +314,14 @@ int parseCommand(struct Token **token, struct Node **ast)
         free_ast(command->children[0]);
         command->nb_children = 0;
     }
-    *ast = command;
+    if (*ast == NULL)
+        *ast = command;
+    else
+    {
+        *ast = realloc(*ast, command->nb_children * sizeof(struct Node *));
+        (*ast)->children[(*ast)->nb_children] = command;
+        (*ast)->nb_children += 1;
+    }
 
     return 0;
 
