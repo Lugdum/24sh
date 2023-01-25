@@ -79,6 +79,7 @@ int main(int argc, char **argv)
             free(buffer);
             return 0;
         }
+        input_args = NULL;
     }
     //from file
     else if (argc >= 2 && strcmp(argv[1], "-c"))

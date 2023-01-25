@@ -9,6 +9,8 @@
 
 char *expand_star()
 {
+    if (!input_arguments)
+        return NULL;
     int i = 0;
     char *r = calloc(1, 1);
     int size = 0;
@@ -28,6 +30,8 @@ char *expand_star()
 
 char **expand_at()
 {
+    if (!input_arguments)
+        return NULL;
     int i = 0;
     char **r = NULL;
     int size = 0;
@@ -59,6 +63,8 @@ char *expand_dollar()
 
 char *expand_n(int n)
 {
+    if (!input_arguments)
+        return NULL;
     char *r = NULL;
     int size = 0;
     int i = 0;
@@ -74,6 +80,8 @@ char *expand_n(int n)
 
 char *expand_sharp()
 {
+    if (!input_arguments)
+        return NULL;
     char *b = calloc(100, 1);
     int j = 0;
     while (input_arguments[j] != NULL)

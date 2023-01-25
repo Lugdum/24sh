@@ -279,12 +279,15 @@ void comput_special_variables()
     char **temp = expand_at();
     modify_value_multiple(var_list, "@", temp);
     int i = 0;
+    if (temp)
+    {
     while (temp[i])
     {
         free(temp[i]);
         i++;
     }
     free(temp);
+    }
     char *tmp;
     for (i = 0; i < 9; i++)
     {
