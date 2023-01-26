@@ -31,7 +31,7 @@ enum TokenType
     PL,
     PR,
     CHEVREL,
-    CHEVRED,
+    CHEVRER,
     CASE,
     ESAC,
     VIRG,

@@ -109,7 +109,7 @@ struct Token *process(char *str, struct Token *tok)
     else if (!strcmp("do", str))
         token->type = DO;
     else if (!strcmp(">", str))
-        token->type = CHEVRED;
+        token->type = CHEVRER;
     else if (!strcmp("<", str))
         token->type = CHEVREL;
     else if (!strcmp("done", str))
@@ -291,7 +291,7 @@ void print_token(struct Token *token)
         case B_CL:
             printf("} ");
             break;
-        case CHEVRED:
+        case CHEVRER:
             printf("> ");
             break;
         case CHEVREL:
