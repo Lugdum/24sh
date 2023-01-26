@@ -305,22 +305,31 @@ int parseCommand(struct Token **token, struct Node **ast)
     (command)->nb_children = 1;
 
     char **word = &command->children[0]->children[0]->value;
+    struct Function *found = findFunction(*word);
+    int in_func = 0;
+    if (found)
+    {
+        in_func = 1;
+        command->function = found;
+        command->type = AST_FUNCTION;
+    }
     if (strlen(*word) > 1 && (*word)[strlen(*word) - 2] == '(' && (*word)[strlen(*word) - 1] == ')')
     {
-        struct Function *found = findFunction(*word);
-        if (!found)
-        {
-            parseFunction(token, *word);
-            command->type = AST_CRET_FUNC;
-        }
+        in_func = 1;
+        strtok(*word, "()");
+        found = findFunction(*word);
+        if (found)
+            parseFunctionReplace(token, found);
         else
-        {
-            command->function = found;
-            command->type = AST_FUNCTION;
-        }
+            parseFunction(token, *word);
+        command->type = AST_CRET_FUNC;
+    }
+    if (in_func)
+    {
         free_ast(command->children[0]);
         command->nb_children = 0;
     }
+
     if (*ast == NULL)
         *ast = command;
     else
