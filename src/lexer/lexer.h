@@ -36,11 +36,6 @@ enum TokenType
     ESP,
     CHEVREL, // <
     CHEVRER, // >
-    DCHEVRER, // >>
-    CHEVRERESP, // >&
-    CHEVREGESP, // <&
-    CHEVRERPIPE, // >|
-    CHEVREGR, // <>
 };
 
 struct Token

@@ -22,7 +22,7 @@ struct Token *no_double(struct Token *tok)
     tok = tok->next;
     while (tok)
     {
-        if (tok->type == SC && pre->type == SC)
+        if (tok->type == SC && (pre->type == SC || pre->type == B_OP))
         {
             struct Token *tmp = tok->next;
             pre->next = tok->next;
