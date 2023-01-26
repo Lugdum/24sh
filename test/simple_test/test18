@@ -1,4 +1,5 @@
+#test 18
 if false || true
-    then echo LOOSE
-else echo WIN
+    then echo BOOOOH LE LOOSER
+else echo TESCHAUDCHAKAL
 fi

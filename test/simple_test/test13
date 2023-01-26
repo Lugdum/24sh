@@ -1,5 +1,6 @@
-if false && false && true
-    then echo WIN
-    else if true && true && false
-    then echo WIN
+#test 13
+if true && false && true
+    then echo OK
+    else if false && true && false
+    then echo OK
 fi fi

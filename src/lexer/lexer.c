@@ -22,7 +22,7 @@ struct Token *no_double(struct Token *tok)
     tok = tok->next;
     while (tok)
     {
-        if (tok->type == SC && pre->type == SC)
+        if (tok->type == SC && (pre->type == SC || pre->type == B_OP))
         {
             struct Token *tmp = tok->next;
             pre->next = tok->next;
@@ -39,6 +39,79 @@ struct Token *no_double(struct Token *tok)
         }
     }
     return begin;
+}
+
+void fix_chevre(struct Token *tok)
+{
+    struct Token *pre = tok;
+    tok = tok->next;
+    while (tok)
+    {
+        if (pre->type == CHEVRER)
+        {
+            pre->type = WORD;
+            pre->value = calloc(4, 1);
+            int rm = 1;
+            if(tok->type == CHEVRER)
+                strcpy(pre->value, ">>\0");
+            else if(tok->type == ESP)
+                strcpy(pre->value, ">&\0");
+            else if(tok->type == PIPE)
+                strcpy(pre->value, ">|\0");
+            else
+            {
+                strcpy(pre->value, ">\0");
+                rm = 0;
+            }
+            if (rm)
+            {
+                pre->next = tok->next;
+                free(tok->value);
+                free(tok);
+                tok = pre->next;
+            }
+        }
+        else if (pre->type == CHEVREL)
+        {
+            pre->type = WORD;
+            pre->value = calloc(4, 1);
+            int rm = 1;
+            if(tok->type == CHEVRER)
+                strcpy(pre->value, "<>\0");
+            else if(tok->type == ESP)
+                strcpy(pre->value, "<&\0");
+            else
+            {
+                strcpy(pre->value, ">\0");
+                rm = 0;
+            }
+            if (rm)
+            {
+                pre->next = tok->next;
+                free(tok->value);
+                free(tok);
+                tok = pre->next;
+            }
+        }
+        else if (pre->type == ESP && tok->type == ESP)
+        {
+            pre->next = tok->next;
+            free(tok->value);
+            free(tok);
+            tok = pre->next;
+            pre->type = AND;
+        }
+        else if (pre->type == PIPE && tok->type == PIPE)
+        {
+            pre->next = tok->next;
+            free(tok->value);
+            free(tok);
+            tok = pre->next;
+            pre->type = OR;
+        }
+        pre = tok;
+        tok = tok->next;
+    }
 }
 
 struct Token *process_end_of_file(struct Token *tok)
@@ -78,8 +151,20 @@ struct Token *process(char *str, struct Token *tok)
         token->type = PIPE;
     else if (!strcmp(";", str))
         token->type = SC;
+    else if (!strcmp(",", str))
+        token->type = VIRG;
     else if (!strcmp("!", str))
         token->type = EM;
+    else if (!strcmp("&", str))
+        token->type = ESP;
+    else if (!strcmp("(", str))
+        token->type = PL;
+    else if (!strcmp(")", str))
+        token->type = PR;
+    else if (!strcmp("case", str))
+        token->type = CASE;
+    else if (!strcmp("esac", str))
+        token->type = ESAC;
     else if (!strcmp("{", str))
         token->type = B_OP;
     else if (!strcmp("}", str))
@@ -98,14 +183,16 @@ struct Token *process(char *str, struct Token *tok)
         token->type = IN;
     else if (!strcmp("do", str))
         token->type = DO;
+    else if (!strcmp(">", str))
+        token->type = CHEVRER;
+    else if (!strcmp("<", str))
+        token->type = CHEVREL;
     else if (!strcmp("done", str))
         token->type = DONE;
     else if (!strcmp("while", str))
         token->type = WHILE;
     else if (!strcmp("until", str))
         token->type = UNTIL;
-    else if (!strcmp("ls", str))
-        token->type = LS;
     else if (!strcmp(" ", str))
     {
         free(token);
@@ -169,7 +256,9 @@ struct Token *lexer(char *input)
             continue;
         }
         //if space ; or \n then end token exept if quoted
-        if (input[i] == ' ' || input[i] == ';' || input[i] == '\n')
+        if (input[i] == ' ' || input[i] == ';' || input[i] == '\n' 
+                || input[i] == ','|| input[i] == '|' || input[i] == '&'
+                || input[i] == '>'|| input[i] == '<')
         {
             if (!quote)
             {
@@ -204,6 +293,7 @@ struct Token *lexer(char *input)
     cur_tok = out->next;
     free(out);
     cur_tok = no_double(cur_tok);
+    fix_chevre(cur_tok);
     return cur_tok;
 }
 
@@ -224,6 +314,15 @@ void print_token(struct Token *token)
             break;
         case ELSE:
             printf("ELSE ");
+            break;
+        case CASE:
+            printf("CASE ");
+            break;
+        case ESAC:
+            printf("ESAC ");
+            break;
+        case VIRG:
+            printf(", ");
             break;
         case FI:
             printf("FI ");
@@ -261,8 +360,20 @@ void print_token(struct Token *token)
         case B_OP:
             printf("{ ");
             break;
+        case PL:
+            printf("( ");
+            break;
+        case PR:
+            printf(") ");
+            break;
         case B_CL:
             printf("} ");
+            break;
+        case CHEVRER:
+            printf("> ");
+            break;
+        case CHEVREL:
+            printf("< ");
             break;
         case NL:
             printf("\\n ");

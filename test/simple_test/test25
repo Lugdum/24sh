@@ -1,4 +1,5 @@
+#test 25
 if true && false
-    then echo LOOSE
-else echo WIN
+    then echo C EST PERDU NE RETENTE PAS T ES JUSTE NUL
+else echo OK MY BAD T AS REUSSI
 fi

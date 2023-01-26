@@ -1,5 +1,6 @@
+#test 14
 if true && false && true
-    then echo WIN
+    then echo YEP
     else if false && true && false
-    then echo WIN
+    then echo ALRIGHT
 fi fi

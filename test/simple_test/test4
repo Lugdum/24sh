@@ -1,4 +1,5 @@
+#test 4
 if true
-then echo simple if
-else echo LOOSE
+then echo easy if
+else echo KO
 fi

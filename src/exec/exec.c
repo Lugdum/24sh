@@ -46,6 +46,11 @@ int process_variable(struct Node *ast)
     return TRUE;
 }
 
+int process_function(struct Node *ast)
+{
+    return node_type(ast->function->body);
+}
+
 int exec_command(struct Node *ast)
 {
     if (!strcmp(ast->children[0]->value, "echo"))
@@ -289,6 +294,15 @@ int node_type(struct Node *ast)
         break;
     case AST_EM:
         r = process_em(ast);
+        break;
+    case AST_BLOCK:
+        r = process_list(ast);
+        break;
+    case AST_CRET_FUNC:
+        r = TRUE;
+        break;
+    case AST_FUNCTION:
+        r = process_function(ast);
         break;
     default:
         printf("Unknown Node type\n");

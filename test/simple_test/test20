@@ -1,5 +1,6 @@
+#test 20
 if false || false
-    then echo LOOSE
+    then echo C EST PERDU DOMMAGE
     else if false || true
-    then echo WIN
+    then echo OUUUUUUUAIS VICTOIRE
 fi fi
