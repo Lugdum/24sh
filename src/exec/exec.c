@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+
 #include "exec.h"
 #include "../variable/variable.h"
 #include "../variable/special_variable.h"
@@ -11,6 +12,24 @@
 struct variable_list *var_list;
 char **input_arguments;
 int exit_status;
+
+int dot(struct Node *ast)
+{
+    char *file2 = ast->children[1]->value;
+    char *script2 = file_to_char(file2);
+    if (script2 == NULL)
+        return TRUE;
+    struct Token *tokens2 = lexer(script2);
+    free(script2);
+    struct Node *ast2;
+    int res = parse(tokens2, &ast2);
+    free_lexer(tokens2);
+    if (res)
+        return ERROR;
+    int r = node_type(ast2); 
+    free_ast(ast2);
+    return r;
+}
 
 int process_variable(struct Node *ast)
 {
@@ -32,6 +51,10 @@ int exec_command(struct Node *ast)
     if (!strcmp(ast->children[0]->value, "echo"))
     {
         return echo(ast);
+    }
+    if (!strcmp(ast->children[0]->value, "."))
+    {
+        return dot(ast);
     }
     else if (!strcmp(ast->children[0]->value, "true"))
     {

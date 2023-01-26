@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "lexer.h"
 
 #include <stdio.h>
@@ -296,4 +297,43 @@ void free_lexer(struct Token *token)
         free(token);
         token = next;
     }
+}
+
+char *file_to_char(char *file)
+{
+    char *script = malloc(sizeof(char)), *line = NULL;
+    size_t n = 1, len = 0;
+    //ssize_t getline();
+    FILE *fp = fopen(file, "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "An error occured when openning %s\n", file);
+        free(script); 
+        return NULL;
+    }
+    while (getline(&line, &len, fp) != -1)
+    {
+        size_t i = 0;
+        len = strlen(line);
+        script = realloc(script, sizeof(char) * (n + len));
+        while (i < len)
+        {
+            // I need the \n for the comments
+            if (line[i] == '\n')
+            {
+                script[n - 1] = '\n';
+                i++;
+                n++;
+                continue;
+            }
+            script[n - 1] = line[i];
+            i++;
+            n++;
+        }
+    }
+    if (line)
+        free(line);
+    fclose(fp);
+    script[n -  1] = '\0';
+    return script;
 }
