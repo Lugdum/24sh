@@ -15,5 +15,6 @@ struct Function {
 int parseFunction(struct Token **token, char *name);
 struct Function* findFunction(const char* name);
 void free_functions(struct Function *func);
+void printFunction(void);
 
 #endif /* !FUNCTION_H */

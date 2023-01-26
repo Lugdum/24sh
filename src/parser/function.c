@@ -1,5 +1,6 @@
 #include "function.h"
 #include "parser.h"
+#include "parser_print.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +39,17 @@ struct Function* findFunction(const char* name)
         current = current->next;
     }
     return NULL;
+}
+
+
+void printFunction(void)
+{
+    struct Function *current = functions;
+    while (current)
+    {
+        prettyprint(current->body, stdout);
+        current = current->next;
+    }
 }
 
 

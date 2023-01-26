@@ -3,6 +3,7 @@
 #include "lexer/lexer.h"
 #include "parser/parser_print.h"
 #include "parser/parser.h"
+#include "parser/function.h"
 #include "parser/ast.h"
 #include "exec/exec.h"
 #include "variable/variable.h"
@@ -125,6 +126,8 @@ int main(int argc, char **argv)
         prettyprint(ast, stdout);
     else if (argc >= 3 && (!strcmp(argv[argc-1], "sp") || !strcmp(argv[argc-1], "tsp")))
         sexyprint(ast);
+    else if (argc >= 3 && (argv[argc-1][strlen(argv[argc-1])-1] == 'f'))
+        printFunction();
     
     // exec script if no error
     if (!res && ast)
