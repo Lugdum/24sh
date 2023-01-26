@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "lexer/lexer.h"
 #include "parser/parser_print.h"
 #include "parser/parser.h"
@@ -12,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+extern struct Function *functions;
 
 char *file_to_char(char *file)
 {
@@ -64,9 +68,18 @@ int main(int argc, char **argv)
     if (argc == 1)
     {
         char *buffer = calloc(20000, 1);
-        read(STDIN_FILENO, buffer, 20000);
-        tokens = lexer(buffer);
-        free(buffer);
+        ssize_t rr = read(STDIN_FILENO, buffer, 20000);
+        if (rr > 0)
+        {
+            tokens = lexer(buffer);
+            free(buffer);
+        }
+        else
+        {
+            free(buffer);
+            return 0;
+        }
+        input_args = NULL;
     }
     //from file
     else if (argc >= 2 && strcmp(argv[1], "-c"))
@@ -114,10 +127,11 @@ int main(int argc, char **argv)
         sexyprint(ast);
     
     // exec script if no error
-    if (!res)
+    if (!res && ast)
         res = main_exec(ast, input_args);
 
     free_lexer(tokens);
     free_ast(ast);
+    free_functions(functions);
     return res;
 }

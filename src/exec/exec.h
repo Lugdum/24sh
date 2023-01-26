@@ -15,5 +15,8 @@ int node_type(struct Node *ast);
 #define TRUE 0
 #define FALSE 1
 #define ERROR 2
+#define CONTINUE 3
+#define BREAK 4
+#define EXIT 5
 
 #endif /* !EXEC_H */

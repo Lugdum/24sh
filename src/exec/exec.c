@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "exec.h"
 #include "../variable/variable.h"
 #include "../variable/special_variable.h"
@@ -30,7 +31,7 @@ int exec_command(struct Node *ast)
 {
     if (!strcmp(ast->children[0]->value, "echo"))
     {
-        return echo(ast, 1);
+        return echo(ast);
     }
     else if (!strcmp(ast->children[0]->value, "true"))
     {
@@ -39,6 +40,18 @@ int exec_command(struct Node *ast)
     else if (!strcmp(ast->children[0]->value, "false"))
     {
         return FALSE;
+    }
+    else if (!strcmp(ast->children[0]->value, "continue"))
+    {
+        return CONTINUE;
+    }
+    else if (!strcmp(ast->children[0]->value, "break"))
+    {
+        return BREAK;
+    }
+    else if (!strcmp(ast->children[0]->value, "exit"))
+    {
+        return EXIT;
     }
     else
     {
@@ -74,7 +87,7 @@ int process_for(struct Node *ast)
             modify_value(var_list, ast->value, expanded[j]);
             r = node_type(ast->children[1]);
             //error
-            if (r == ERROR)
+            if (r >= ERROR)
             {
                 int k = 0;
                 while (expanded[k])
@@ -83,7 +96,7 @@ int process_for(struct Node *ast)
                     k++;
                 }
                 free(expanded);
-                return ERROR;
+                return r;
             }
             j++;
         }
@@ -106,7 +119,11 @@ int process_while(struct Node *ast)
     {
         r = node_type(ast->children[1]);
         if (r == ERROR)
-            return ERROR;
+            return r;
+        else if (r == BREAK)
+            return TRUE;
+        else if (r == CONTINUE)
+            r = TRUE;
     }
     return r;
 }
@@ -117,7 +134,11 @@ int process_until(struct Node *ast)
     {
         r = node_type(ast->children[1]);
         if (r == ERROR)
-            return ERROR;
+            return r;
+        else if (r == BREAK)
+            return TRUE;
+        else if (r == CONTINUE)
+            r = TRUE;
     }
     return r;
 }
@@ -129,8 +150,8 @@ int process_cmd(struct Node *ast)
         if (ast->children[i]->type == AST_SIMPLE_COMMAND)
         {
             r = node_type(ast->children[i]);
-            if (r == ERROR)
-                return ERROR;
+            if (r >= ERROR)
+                return r;
         }
     }
     return r;
@@ -142,30 +163,30 @@ int process_list(struct Node *ast)
     for (int i = 0; i < ast->nb_children; i++)
     {
         r = node_type(ast->children[i]);
-        if (r == ERROR)
-            return ERROR;
+        if (r >= ERROR)
+            return r;
     }
     return r;
 }
 
 int process_pipe(struct Node *ast)
 {
-    // int fd = -1;
     int r = node_type(ast->children[0]);
-    if (r == ERROR)
-        return ERROR;
+    if (r >= ERROR)
+        return r;
     r = node_type(ast->children[1]);
+    exit_status = r;
     return r;
 }
 
 int process_and(struct Node *ast)
 {
     int l = node_type(ast->children[0]);
-    if (l == ERROR)
-        return ERROR;
+    if (l >= ERROR)
+        return l;
     int r = node_type(ast->children[1]);
-    if (r == ERROR)
-        return ERROR;
+    if (r >= ERROR)
+        return r;
     r = ((l == TRUE) && (r == TRUE));
     if (r)
         return TRUE;
@@ -175,11 +196,11 @@ int process_and(struct Node *ast)
 int process_or(struct Node *ast)
 {
     int l = node_type(ast->children[0]);
-    if (l == ERROR)
-        return ERROR;
+    if (l >= ERROR)
+        return l;
     int r = node_type(ast->children[1]);
-    if (r == ERROR)
-        return ERROR;
+    if (r >= ERROR)
+        return r;
     r = ((l == TRUE) || (r == TRUE));
     if (r)
         return TRUE;
@@ -202,6 +223,7 @@ int process_em(struct Node *ast)
         r = FALSE;
     else if (r == FALSE)
         r = TRUE;
+    exit_status = r;
     return r;
 }
 int node_type(struct Node *ast)
@@ -257,12 +279,15 @@ void comput_special_variables()
     char **temp = expand_at();
     modify_value_multiple(var_list, "@", temp);
     int i = 0;
+    if (temp)
+    {
     while (temp[i])
     {
         free(temp[i]);
         i++;
     }
     free(temp);
+    }
     char *tmp;
     for (i = 0; i < 9; i++)
     {
@@ -306,7 +331,7 @@ int main_exec(struct Node *ast, char **input_args)
     comput_special_variables();
 
     int r = node_type(ast);
-    if (r == TRUE || r == FALSE)
+    if (r != ERROR)
         r = 0;
     free_list(var_list);
     return r;

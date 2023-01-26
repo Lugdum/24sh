@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "variable.h"
 #include "special_variable.h"
 #include "../exec/exec.h"
@@ -49,7 +51,7 @@ void modify_value(struct variable_list *list, char *name, char *value)
 }
 void modify_value_multiple(struct variable_list *list, char *name, char **value)
 {
-    if (value[0] == NULL)
+    if (value == NULL || value[0] == NULL)
         return;
     if (find_value(list, name))
     {

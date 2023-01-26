@@ -4,6 +4,6 @@
 #include "../parser/parser.h"
 #include "exec.h"
 
-int echo(struct Node *ast, int fd);
+int echo(struct Node *ast);
 
 #endif /* !ECHO_H */

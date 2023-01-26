@@ -5,6 +5,41 @@
 #include <string.h>
 #include <stdbool.h>
 
+struct Token *no_double(struct Token *tok)
+{
+    struct Token *pre = tok;
+    struct Token *begin = tok;
+    while (tok->type == SC)
+    {
+        pre = tok;
+        tok = tok->next;
+        free(pre->value);
+        free(pre);
+    }
+    begin = tok;
+    pre = tok;
+    tok = tok->next;
+    while (tok)
+    {
+        if (tok->type == SC && pre->type == SC)
+        {
+            struct Token *tmp = tok->next;
+            pre->next = tok->next;
+            
+            free(tok->value);
+            free(tok);
+
+            tok = tmp;
+        }
+        else
+        {
+            pre = tok;
+            tok = tok->next;
+        }
+    }
+    return begin;
+}
+
 struct Token *process_end_of_file(struct Token *tok)
 {
     struct Token *token = calloc(1, sizeof(struct Token));
@@ -109,7 +144,7 @@ struct Token *lexer(char *input)
     while (i < len)
     {
         //if # at the start of line then whole line is comment
-        if (input[i] == '#' && past == '\n')
+        if (input[i] == '#' && (past == '\n' || i == 0))
         {
             while (input[i] != '\n')
                 i++;
@@ -167,6 +202,7 @@ struct Token *lexer(char *input)
     free(cur);
     cur_tok = out->next;
     free(out);
+    cur_tok = no_double(cur_tok);
     return cur_tok;
 }
 
