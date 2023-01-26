@@ -122,11 +122,11 @@ int main(int argc, char **argv)
     }
 
     // Print if asked in argument
-    if (argc >= 3 && (!strcmp(argv[argc-1], "pp") || !strcmp(argv[argc-1], "tpp")))
+    if (argc >= 3 && (!strcmp(argv[argc-1], "pp") || !strcmp(argv[argc-1], "tpp") || !strcmp(argv[argc-1], "tppf")))
         prettyprint(ast, stdout);
-    else if (argc >= 3 && (!strcmp(argv[argc-1], "sp") || !strcmp(argv[argc-1], "tsp")))
+    else if (argc >= 3 && (!strcmp(argv[argc-1], "sp") || !strcmp(argv[argc-1], "tsp") || !strcmp(argv[argc-1], "tspf")))
         sexyprint(ast);
-    else if (argc >= 3 && (argv[argc-1][strlen(argv[argc-1])-1] == 'f'))
+    if (argc >= 3 && (argv[argc-1][strlen(argv[argc-1])-1] == 'f'))
         printFunction();
     
     // exec script if no error
