@@ -28,6 +28,13 @@ enum TokenType
     SQ,
     WORD,
     LS,
+    PL,
+    PR,
+    CHEVREL,
+    CHEVRED,
+    CASE,
+    ESAC,
+    VIRG,
 };
 
 struct Token

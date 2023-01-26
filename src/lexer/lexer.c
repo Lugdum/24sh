@@ -78,8 +78,18 @@ struct Token *process(char *str, struct Token *tok)
         token->type = PIPE;
     else if (!strcmp(";", str))
         token->type = SC;
+    else if (!strcmp(",", str))
+        token->type = VIRG;
     else if (!strcmp("!", str))
         token->type = EM;
+    else if (!strcmp("(", str))
+        token->type = PL;
+    else if (!strcmp(")", str))
+        token->type = PR;
+    else if (!strcmp("case", str))
+        token->type = CASE;
+    else if (!strcmp("esac", str))
+        token->type = ESAC;
     else if (!strcmp("{", str))
         token->type = B_OP;
     else if (!strcmp("}", str))
@@ -98,14 +108,16 @@ struct Token *process(char *str, struct Token *tok)
         token->type = IN;
     else if (!strcmp("do", str))
         token->type = DO;
+    else if (!strcmp(">", str))
+        token->type = CHEVRED;
+    else if (!strcmp("<", str))
+        token->type = CHEVREL;
     else if (!strcmp("done", str))
         token->type = DONE;
     else if (!strcmp("while", str))
         token->type = WHILE;
     else if (!strcmp("until", str))
         token->type = UNTIL;
-    else if (!strcmp("ls", str))
-        token->type = LS;
     else if (!strcmp(" ", str))
     {
         free(token);
@@ -169,7 +181,7 @@ struct Token *lexer(char *input)
             continue;
         }
         //if space ; or \n then end token exept if quoted
-        if (input[i] == ' ' || input[i] == ';' || input[i] == '\n')
+        if (input[i] == ' ' || input[i] == ';' || input[i] == '\n' || input[i] == ',')
         {
             if (!quote)
             {
@@ -261,8 +273,20 @@ void print_token(struct Token *token)
         case B_OP:
             printf("{ ");
             break;
+        case PL:
+            printf("( ");
+            break;
+        case PR:
+            printf(") ");
+            break;
         case B_CL:
             printf("} ");
+            break;
+        case CHEVRED:
+            printf("> ");
+            break;
+        case CHEVREL:
+            printf("< ");
             break;
         case NL:
             printf("\\n ");
