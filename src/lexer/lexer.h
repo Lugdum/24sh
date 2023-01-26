@@ -30,11 +30,17 @@ enum TokenType
     LS,
     PL,
     PR,
-    CHEVREL,
-    CHEVRER,
     CASE,
     ESAC,
     VIRG,
+    ESP,
+    CHEVREL, // <
+    CHEVRER, // >
+    DCHEVRER, // >>
+    CHEVRERESP, // >&
+    CHEVREGESP, // <&
+    CHEVRERPIPE, // >|
+    CHEVREGR, // <>
 };
 
 struct Token

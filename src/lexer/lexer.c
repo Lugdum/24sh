@@ -41,6 +41,79 @@ struct Token *no_double(struct Token *tok)
     return begin;
 }
 
+void fix_chevre(struct Token *tok)
+{
+    struct Token *pre = tok;
+    tok = tok->next;
+    while (tok)
+    {
+        if (pre->type == CHEVRER)
+        {
+            pre->type = WORD;
+            pre->value = calloc(4, 1);
+            int rm = 1;
+            if(tok->type == CHEVRER)
+                strcpy(pre->value, ">>\0");
+            else if(tok->type == ESP)
+                strcpy(pre->value, ">&\0");
+            else if(tok->type == PIPE)
+                strcpy(pre->value, ">|\0");
+            else
+            {
+                strcpy(pre->value, ">\0");
+                rm = 0;
+            }
+            if (rm)
+            {
+                pre->next = tok->next;
+                free(tok->value);
+                free(tok);
+                tok = pre->next;
+            }
+        }
+        else if (pre->type == CHEVREL)
+        {
+            pre->type = WORD;
+            pre->value = calloc(4, 1);
+            int rm = 1;
+            if(tok->type == CHEVRER)
+                strcpy(pre->value, "<>\0");
+            else if(tok->type == ESP)
+                strcpy(pre->value, "<&\0");
+            else
+            {
+                strcpy(pre->value, ">\0");
+                rm = 0;
+            }
+            if (rm)
+            {
+                pre->next = tok->next;
+                free(tok->value);
+                free(tok);
+                tok = pre->next;
+            }
+        }
+        else if (pre->type == ESP && tok->type == ESP)
+        {
+            pre->next = tok->next;
+            free(tok->value);
+            free(tok);
+            tok = pre->next;
+            pre->type = AND;
+        }
+        else if (pre->type == PIPE && tok->type == PIPE)
+        {
+            pre->next = tok->next;
+            free(tok->value);
+            free(tok);
+            tok = pre->next;
+            pre->type = OR;
+        }
+        pre = tok;
+        tok = tok->next;
+    }
+}
+
 struct Token *process_end_of_file(struct Token *tok)
 {
     struct Token *token = calloc(1, sizeof(struct Token));
@@ -82,6 +155,8 @@ struct Token *process(char *str, struct Token *tok)
         token->type = VIRG;
     else if (!strcmp("!", str))
         token->type = EM;
+    else if (!strcmp("&", str))
+        token->type = ESP;
     else if (!strcmp("(", str))
         token->type = PL;
     else if (!strcmp(")", str))
@@ -181,7 +256,9 @@ struct Token *lexer(char *input)
             continue;
         }
         //if space ; or \n then end token exept if quoted
-        if (input[i] == ' ' || input[i] == ';' || input[i] == '\n' || input[i] == ',')
+        if (input[i] == ' ' || input[i] == ';' || input[i] == '\n' 
+                || input[i] == ','|| input[i] == '|' || input[i] == '&'
+                || input[i] == '>'|| input[i] == '<')
         {
             if (!quote)
             {
@@ -216,6 +293,7 @@ struct Token *lexer(char *input)
     cur_tok = out->next;
     free(out);
     cur_tok = no_double(cur_tok);
+    fix_chevre(cur_tok);
     return cur_tok;
 }
 
