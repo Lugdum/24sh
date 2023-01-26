@@ -78,6 +78,8 @@ int main(int argc, char **argv)
     if (res)
     {
         free_lexer(tokens);
+        free_ast(ast);
+        free_functions(functions);
         return res;
     }
 

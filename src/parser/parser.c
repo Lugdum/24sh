@@ -18,7 +18,7 @@ int parse(struct Token *token, struct Node **ast)
     int res = parseList(&token, ast);
 
     // On est bon
-    if (token->type == EF || token->type == NL)
+    if (token && (token->type == EF || token->type == NL))
         return res;
     
     // Erreur de syntax
@@ -108,8 +108,8 @@ int parseList(struct Token **token, struct Node **ast)
 
     *ast = list;
 
-    if ((*token)->type == B_OP && parseBlockCommand(token, ast))
-        return 2;
+    /*if ((*token)->type == B_OP && parseBlockCommand(token, ast))
+        return 2;*/
 
     return res;
 
@@ -318,10 +318,8 @@ int parseCommand(struct Token **token, struct Node **ast)
         in_func = 1;
         strtok(*word, "()");
         found = findFunction(*word);
-        if (found)
-            parseFunctionReplace(token, found);
-        else
-            parseFunction(token, *word);
+        if ((found && parseFunctionReplace(token, found)) || (!found && parseFunction(token, *word)))
+            return 2;
         command->type = AST_CRET_FUNC;
     }
     if (in_func)
