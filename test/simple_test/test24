@@ -1,3 +1,4 @@
+#test 24
 if true && true
-    then echo WIN
+    then echo OK SIMPLE ET EFFICACE
 fi

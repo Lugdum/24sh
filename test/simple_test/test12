@@ -1,9 +1,10 @@
+#test 12
 if false && false
     then
-        echo LOOSE
+        echo KO_BAD_MOOD_BRO
     else
         if true || false
         then 
-            echo WIN
+            echo GG_EZ_WIN
         fi
 fi

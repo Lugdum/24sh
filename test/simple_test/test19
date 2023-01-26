@@ -1,4 +1,5 @@
+#test 19
 if false || false
-    then echo LOOSE
-    else echo WIN
+    then echo LOOSER
+    else echo WINNER
 fi

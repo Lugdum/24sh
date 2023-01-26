@@ -1,5 +1,6 @@
+#test 15
 if false && false && false
-    then echo WIN
+    then echo THAT IS IT BOY
     else if true && false && true
-    then echo WIN
+    then echo STILL GOOD
 fi fi

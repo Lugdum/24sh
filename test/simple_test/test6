@@ -1,11 +1,11 @@
 if true
 then echo simple
-else echo LOOSE
+else echo KO
 fi
-
+#test 6
 if false
 then if true
-then echo a
+then echo azerty
 fi 
-else echo WIN; 
+else echo OK; 
 fi

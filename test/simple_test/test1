@@ -1,1 +1,2 @@
-echo simple;
+#test 1
+echo hello_semicolon;

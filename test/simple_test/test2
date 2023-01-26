@@ -1,1 +1,2 @@
-echo it is a test;
+#test 2
+echo hello my name is test;

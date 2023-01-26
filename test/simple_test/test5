@@ -1,4 +1,5 @@
+#test 5
 if false
-then echo simple if
-else echo WIN
+then echo truc if
+else echo GG
 fi

@@ -1,5 +1,6 @@
+#test 23
 if false || false || false
-    then echo WIN
+    then echo PSAHTEK LA COUPE LE REUF
     else if true || false || true
-    then echo WIN
+    then echo T ES ALLE CHEZ LE COIFFEUR ?
 fi fi

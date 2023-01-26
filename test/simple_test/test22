@@ -1,5 +1,6 @@
+#test 22
 if true || false || true
-    then echo WIN
+    then echo "VICTORY AVEC LES GUILLEMETS QUI PLUS EST AHHA TROP FORT EN SAH"
 else if false || true || false
-    then echo WIN
+    then echo OK PAS MAL MEME SANS LES GUILLEMETS
 fi fi
