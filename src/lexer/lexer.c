@@ -237,6 +237,15 @@ void print_token(struct Token *token)
         case ELSE:
             printf("ELSE ");
             break;
+        case CASE:
+            printf("CASE ");
+            break;
+        case ESAC:
+            printf("ESAC ");
+            break;
+        case VIRG:
+            printf(", ");
+            break;
         case FI:
             printf("FI ");
             break;
