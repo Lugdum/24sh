@@ -4,6 +4,19 @@
 #include <string.h>
 #include <stdlib.h>
 
+int is_redir(char *word)
+{
+    if (strcmp(word, ">") == 0) // > = 1
+        return 1;
+    else if (strcmp(word, ">>") == 0) // >> = 2
+        return 2;
+    else if (strcmp(word, ">|") == 0) // >| = 3
+        return 3;
+    else if (strcmp(word, ">&") == 0) // >& = 4
+        return 4;
+    return -1;
+}
+
 int echo(struct Node *ast)
 {
     int flag_n = 0;
@@ -11,7 +24,17 @@ int echo(struct Node *ast)
     int flag_E = 0;
     int word = 0;
     int son = 0;
-    while (!word && son < ast->nb_children)
+    int redir = 0;
+    int child_num = ast->nb_children;
+    if (child_num > 2)
+    {
+        redir = is_redir(ast->children[child_num - 2]->value);
+        if (redir > 0)
+        {
+            child_num -= 2;
+        }
+    }
+    while (!word && son < child_num)
     {
         son++;
         char *flag = ast->children[son]->value;
@@ -54,7 +77,7 @@ int echo(struct Node *ast)
     char *to_print = NULL;
     int len = 0;
     char to_add = 0;
-    for (int i = son; i < ast->nb_children; i++)
+    for (int i = son; i < child_num; i++)
     {
             // Remplace les séquences d'échappement précédées de \ par leurs
             // équivalents ASCII
@@ -91,7 +114,7 @@ int echo(struct Node *ast)
             }
 
         // Ajoute un espace entre chaque argument, sauf pour le dernier
-        if (i < ast->nb_children - son)
+        if (i < child_num - son)
         {
                 to_print = realloc(to_print, len + 1);
                 to_print[len] = ' ';
@@ -100,22 +123,77 @@ int echo(struct Node *ast)
         }
         free(value);
     }
-    if (len > 0)
+
+    if (ast->nb_children == child_num)
     {
-        if (to_print[len - 1] == ' ')
-            to_print[len - 1] = '\0';
-        else
+        if (len > 0)
         {
-            to_print = realloc(to_print, len + 1);
-            to_print[len] = '\0';
+            if (to_print[len - 1] == ' ')
+                to_print[len - 1] = '\0';
+            else
+            {
+                to_print = realloc(to_print, len + 1);
+                to_print[len] = '\0';
+            }
+            printf("%s", to_print);
+            free(to_print);
         }
-        printf("%s", to_print);
-        free(to_print);
+
+        if (!flag_n)
+        {
+            putchar('\n');
+        }
+    }
+    else
+    {
+        FILE *fp;
+        switch (redir)
+        {
+            case 1:
+                fp = fopen(ast->children[ast->nb_children - 1]->value, "w");
+                break;
+            case 2:
+                fp = fopen(ast->children[ast->nb_children - 1]->value, "a");
+                break;
+            default:
+                fp = NULL;
+                break;
+        }
+        if (fp == NULL) 
+        {
+            // The file could not be opened or created.
+            return ERROR;
+        }
+        if (len > 0)
+        {
+            if (to_print[len - 1] == ' ')
+                to_print[len - 1] = '\0';
+            else
+            {
+                to_print = realloc(to_print, len + 1);
+                to_print[len] = '\0';
+            }
+            if (fprintf(fp, "%s", to_print) < 0)
+            {
+                // Couldn't write string in file
+                return ERROR;
+            }
+            free(to_print);
+        }
+        if (!flag_n)
+        {
+            if (fputs("\n", fp) == EOF)
+            {
+                // Couldn't write \n
+                return ERROR; 
+            }
+        }
+        if(fclose(fp) == EOF)
+        {
+            // Couldn't close file
+            return ERROR;
+        }
     }
 
-    if (!flag_n)
-    {
-        putchar('\n');
-    }
-    return 1;
+    return TRUE;
 }
