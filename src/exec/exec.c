@@ -21,7 +21,7 @@ int dot(struct Node *ast)
         return TRUE;
     struct Token *tokens2 = lexer(script2);
     free(script2);
-    struct Node *ast2;
+    struct Node *ast2 = NULL;
     int res = parse(tokens2, &ast2);
     free_lexer(tokens2);
     if (res)
