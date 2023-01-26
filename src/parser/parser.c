@@ -173,7 +173,7 @@ int parseAndOr(struct Token **token, struct Node **ast)
         return 2;
 
     // Parser le premier élément de AND_OR
-    if (((*token)->type == WORD || (*token)->type == EM))
+    if (((*token)->type == WORD || (*token)->type == EM) || (*token)->type == B_OP)
         res = parsePipeline(token, ast);
 
     // S'il y a plusieurs trucs
@@ -233,7 +233,12 @@ int parsePipeline(struct Token **token, struct Node **ast)
     }
     else
         pipeline->type = AST_PIPELINE;
-    int res = parseCommand(token, &pipeline->children[0]);
+
+    int res = 0;
+    if ((*token)->type == B_OP)
+        res = parseBlockCommand(token, &pipeline->children[0]);
+    else
+        res = parseCommand(token, &pipeline->children[0]);
     if (*ast == NULL)
         *ast = pipeline;
     else
