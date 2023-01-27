@@ -108,19 +108,11 @@ char *get_string(char **var)
     return r;
 }
 
-char **expand_variables(char *str)
+int *detect_var(int *ii, char *cur, int *is_varr, char *str)
 {
-    int size_cur = strlen(str) + 1;
-    char *cur = calloc(size_cur, 1);
-
-    int size_ret = 0;
-    char **ret = NULL;
-
-    // some flags
     int quot = 0;
     int double_quot = 0;
     int is_var = 0;
-    int is_cutted = 0;
 
     int j = 0;
     int i;
@@ -145,20 +137,23 @@ char **expand_variables(char *str)
             j++;
         }
     }
-    if (!is_var)
-    {
-        cur[j] = '\0';
-        ret = malloc(sizeof(char *) * 2);
-        ret[0] = cur;
-        ret[1] = NULL;
-        return ret;
-    }
+    *ii = i;
+    *is_varr = is_var;
+    int *tmp = calloc(2, sizeof(int));
+    tmp[0] = j;
+    tmp[1] = double_quot;
+    return tmp;
+}
 
-    int tmp = i + 1;
-    char **var_value;
-    int free_word = 0;
+char *get_var_name(int *ii, int *args, char ***var_value, char *str)
+{
+    int *is_cutted = &args[0];
+    int *free_word = &args[1];
+    int double_quot = args[2];
     char *word;
-    // get var name
+    int i = *ii;
+    
+    int tmp = i + 1;
     while (str[i] != 0 && str[i] != '\'' && str[i] != '\"')
         i++;
     // if no name
@@ -170,12 +165,12 @@ char **expand_variables(char *str)
         tmp_var_name = strncpy(tmp_var_name, str + tmp, i - tmp);
         char *tmp_trash;
         char *var_name = strtok_r(tmp_var_name, "{}", &tmp_trash);
-        var_value = find_value(var_list, var_name);
+        *var_value = find_value(var_list, var_name);
 
         if (!strcmp(var_name, "RANDOM") || !strcmp(var_name, "(RANDOM)"))
         {
             word = expand_random();
-            free_word = 1;
+            *free_word = 1;
         }
         else if (!var_value)
         {
@@ -183,29 +178,25 @@ char **expand_variables(char *str)
         }
         else if (double_quot)
         {
-            free_word = 1;
-            word = get_string(var_value);
+            *free_word = 1;
+            word = get_string(*var_value);
         }
         else
         {
             word = "";
-            is_cutted = 1;
+            *is_cutted = 1;
         }
         free(tmp_var_name);
     }
-    // copy var value to return string if quoted
-    cur = realloc(cur, size_cur + strlen(word));
-    strcpy(cur + j, word);
+    *ii = i;
+    return word;
+}
 
-    ret = malloc(sizeof(char *) * 2);
-    ret[0] = cur;
-    ret[1] = NULL;
-
-    if (free_word)
-        free(word);
-    if (!is_cutted)
-        return ret;
-
+void get_if_cutted(char **var_value, char ***rett, int *size_rett)
+{
+    char **ret = *rett;
+    char *word = NULL;
+    int size_ret = *size_rett;
     int var_i = 0;
     while (var_value[var_i])
     {
@@ -232,6 +223,53 @@ char **expand_variables(char *str)
         var_i++;
         free(tmp);
     }
+    *rett = ret;
+    *size_rett = size_ret;
+}
+
+char **expand_variables(char *str)
+{
+    int size_cur = strlen(str) + 1;
+    char *cur = calloc(size_cur, 1);
+
+    int size_ret = 0;
+    char **ret = NULL;
+    int i = 0;
+    int is_var = 0;
+    int *tmp = detect_var(&i, cur, &is_var, str);
+    int j = tmp[0];
+    int double_quot = tmp[1];
+    free(tmp);
+    if (!is_var)
+    {
+        cur[j] = '\0';
+        ret = malloc(sizeof(char *) * 2);
+        ret[0] = cur;
+        ret[1] = NULL;
+        return ret;
+    }
+
+    char **var_value;
+    // get var name
+    int args[3] = { 0, 0, double_quot};
+    char *word = get_var_name(&i, args, &var_value, str);
+    int free_word = args[1];
+    int is_cutted = args[0];
+    // copy var value to return string if quoted
+    cur = realloc(cur, size_cur + strlen(word));
+    strcpy(cur + j, word);
+
+    ret = malloc(sizeof(char *) * 2);
+    ret[0] = cur;
+    ret[1] = NULL;
+
+    if (free_word)
+        free(word);
+    if (!is_cutted)
+        return ret;
+
+    get_if_cutted(var_value, &ret, &size_ret);
+
     ret = realloc(ret, sizeof(char *) * (size_ret + 1));
     ret[size_ret] = NULL;
     return ret;
