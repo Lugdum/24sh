@@ -1,9 +1,18 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#include "echo.h"
-#include "../parser/parser.h"
+#define _POSIX_C_SOURCE 200809L
+
+#include "some_exec_func.h"
 #include "../variable/variable.h"
+#include "../parser/parser.h"
+#include "../variable/special_variable.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include "echo.h"
 
 extern struct variable_list *var_list;
 extern char **input_arguments;

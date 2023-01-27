@@ -18,13 +18,30 @@ int parseFunction(struct Token **token, char *name)
 
     struct Function *new_func = calloc(1, sizeof(struct Function));
     new_func->name = calloc(1, strlen(name) + 1);
-    strcpy(new_func->name, name);
+    strncpy(new_func->name, name, strlen(name));
     new_func->ref_count = 1;
     if(parseBlockCommand(token, &(new_func->body)))
         return 2;
 
     new_func->next = functions;
     functions = new_func;
+    return 0;
+}
+
+
+int parseFunctionReplace(struct Token **token, struct Function *replace)
+{
+    //skip NL
+    while ((*token) != NULL && (*token)->type != B_OP)
+        (*token) = (*token)->next;
+    if (*token == NULL)
+        return 2;
+
+    free_ast(replace->body);
+    replace->body = NULL;
+    if(parseBlockCommand(token, &replace->body))
+        return 2;
+
     return 0;
 }
 

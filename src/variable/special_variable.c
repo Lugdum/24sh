@@ -1,13 +1,14 @@
-#include "variable.h"
 #include "special_variable.h"
-#include "../exec/exec.h"
 
-#include <sys/types.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
 
-char *expand_star()
+#include "../exec/exec.h"
+#include "variable.h"
+
+char *expand_star(void)
 {
     if (!input_arguments)
         return NULL;
@@ -28,7 +29,7 @@ char *expand_star()
     return r;
 }
 
-char **expand_at()
+char **expand_at(void)
 {
     if (!input_arguments)
         return NULL;
@@ -37,24 +38,24 @@ char **expand_at()
     int size = 0;
     while (input_arguments[i] != 0)
     {
-        r = realloc(r, sizeof(char *) * (size + 1)); 
+        r = realloc(r, sizeof(char *) * (size + 1));
         r[size] = malloc(strlen(input_arguments[i]) + 1);
         r[size] = strcpy(r[i], input_arguments[i]);
         i++;
         size++;
     }
-    r = realloc(r, sizeof(char *) * (size + 1)); 
+    r = realloc(r, sizeof(char *) * (size + 1));
     r[size] = NULL;
     return r;
 }
-char *expand_question_mark()
+char *expand_question_mark(void)
 {
     char *b = calloc(100, 1);
     sprintf(b, "%d", exit_status);
     return b;
 }
 
-char *expand_dollar()
+char *expand_dollar(void)
 {
     char *b = calloc(100, 1);
     sprintf(b, "%i", getpid());
@@ -78,7 +79,7 @@ char *expand_n(int n)
     return r;
 }
 
-char *expand_sharp()
+char *expand_sharp(void)
 {
     if (!input_arguments)
         return NULL;
@@ -90,21 +91,21 @@ char *expand_sharp()
     return b;
 }
 
-char *expand_uid()
+char *expand_uid(void)
 {
     char *b = calloc(100, 1);
     sprintf(b, "%d", getuid());
     return b;
 }
 
-char *expand_pwd()
+char *expand_pwd(void)
 {
     char *b = calloc(1000, 1);
     getcwd(b, 1000);
     return b;
 }
 
-char *expand_random()
+char *expand_random(void)
 {
     int r = rand() % 32767;
     char *b = calloc(10, 1);

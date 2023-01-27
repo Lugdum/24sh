@@ -18,7 +18,7 @@ int parse(struct Token *token, struct Node **ast)
     int res = parseList(&token, ast);
 
     // On est bon
-    if (token->type == EF || token->type == NL)
+    if (token && (token->type == EF || token->type == NL))
         return res;
     
     // Erreur de syntax
@@ -95,7 +95,8 @@ int parseList(struct Token **token, struct Node **ast)
             break;
 
         struct Node *tmp = NULL;
-        res = parseAndOr(token, &tmp);
+        if (parseAndOr(token, &tmp))
+            goto error;
 
         list->children = realloc(list->children, (i + 1) * sizeof(struct Node *));
         list->nb_children += 1;
@@ -108,14 +109,13 @@ int parseList(struct Token **token, struct Node **ast)
 
     *ast = list;
 
-    if ((*token)->type == B_OP && parseBlockCommand(token, ast))
-        return 2;
+    /*if ((*token)->type == B_OP && parseBlockCommand(token, ast))
+        return 2;*/
 
     return res;
 
 error:
-    free(list->children);
-    free(list);
+    free_ast(list);
     return 2;
 }
 
@@ -239,6 +239,7 @@ int parsePipeline(struct Token **token, struct Node **ast)
         res = parseBlockCommand(token, &pipeline->children[0]);
     else
         res = parseCommand(token, &pipeline->children[0]);
+
     if (*ast == NULL)
         *ast = pipeline;
     else
@@ -247,6 +248,9 @@ int parsePipeline(struct Token **token, struct Node **ast)
         (*ast)->children[(*ast)->nb_children] = pipeline;
         (*ast)->nb_children += 1;
     }
+
+    if (res)
+        goto error;
 
     // S'il y a plusieurs trucs
     while (*token != NULL && (*token)->type == PIPE)
@@ -264,7 +268,8 @@ int parsePipeline(struct Token **token, struct Node **ast)
             type = AST_EM;
         }
         struct Node *right = NULL;
-        parseCommand(token, &right);
+        if (parseCommand(token, &right))
+            goto error;
 
         // Creer le noeud PIPELINE et donner les commandes a droite et a gauche
         struct Node *pipeline = calloc(1, sizeof(struct Node));
@@ -284,6 +289,10 @@ int parsePipeline(struct Token **token, struct Node **ast)
     }
 
     return res;
+
+error:
+    free_ast(*ast);
+    return 2;
 }
 
 
@@ -305,22 +314,30 @@ int parseCommand(struct Token **token, struct Node **ast)
     (command)->nb_children = 1;
 
     char **word = &command->children[0]->children[0]->value;
+    struct Function *found = findFunction(*word);
+    int in_func = 0;
+    if (found)
+    {
+        in_func = 1;
+        command->function = found;
+        command->type = AST_FUNCTION;
+    }
     if (strlen(*word) > 1 && (*word)[strlen(*word) - 2] == '(' && (*word)[strlen(*word) - 1] == ')')
     {
-        struct Function *found = findFunction(*word);
-        if (!found)
-        {
-            parseFunction(token, *word);
-            command->type = AST_CRET_FUNC;
-        }
-        else
-        {
-            command->function = found;
-            command->type = AST_FUNCTION;
-        }
+        in_func = 1;
+        char *tw = *(word + strlen(*word) - 3);
+        free(tw);
+        found = findFunction(*word);
+        if ((found && parseFunctionReplace(token, found)) || (!found && parseFunction(token, *word)))
+            goto error;
+        command->type = AST_CRET_FUNC;
+    }
+    if (in_func)
+    {
         free_ast(command->children[0]);
         command->nb_children = 0;
     }
+
     if (*ast == NULL)
         *ast = command;
     else
@@ -334,6 +351,7 @@ int parseCommand(struct Token **token, struct Node **ast)
 
 error:
     free_ast(*ast);
+    free_ast(command);
     return 2;
 }
 
