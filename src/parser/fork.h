@@ -1,5 +1,5 @@
-#ifndef FORK_H 
-#define FORK_H
+#ifndef FORK_H
+#    define FORK_H
 
 enum FLAG
 {

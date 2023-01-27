@@ -75,7 +75,7 @@ int process_em(struct Node *ast)
     return r;
 }
 int other_node_type(struct Node *ast)
-{  
+{
     int r = 0;
     switch (ast->type)
     {
@@ -148,12 +148,12 @@ void comput_special_variables()
     int i = 0;
     if (temp)
     {
-    while (temp[i])
-    {
-        free(temp[i]);
-        i++;
-    }
-    free(temp);
+        while (temp[i])
+        {
+            free(temp[i]);
+            i++;
+        }
+        free(temp);
     }
     char *tmp;
     for (i = 0; i < 9; i++)
@@ -164,7 +164,7 @@ void comput_special_variables()
         modify_value(var_list, buffer, tmp);
         free(tmp);
     }
-    
+
     tmp = expand_star();
     modify_value(var_list, "*", tmp);
     free(tmp);
@@ -193,8 +193,8 @@ int main_exec(struct Node *ast, char **input_args)
     var_list->size = 0;
     var_list->list = NULL;
     input_arguments = input_args;
-    exit_status = 0;    
-    
+    exit_status = 0;
+
     comput_special_variables();
 
     int r = node_type(ast);

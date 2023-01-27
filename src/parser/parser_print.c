@@ -80,7 +80,8 @@ void print_node(struct Node *node, int parent, FILE *f)
         fprintf(f, "node%d [label=\"BLOCK\"];\n", current_node);
         break;
     case AST_FUNCTION:
-        fprintf(f, "node%d [label=\"FUNCTION\n%s\"];\n", current_node, node->function->name);
+        fprintf(f, "node%d [label=\"FUNCTION\n%s\"];\n", current_node,
+                node->function->name);
         break;
     case AST_CRET_FUNC:
         fprintf(f, "node%d [label=\"CREATE FUNCTION\"];\n", current_node);

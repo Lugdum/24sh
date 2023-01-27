@@ -152,7 +152,7 @@ char *get_var_name(int *ii, int *args, char ***var_value, char *str)
     int double_quot = args[2];
     char *word;
     int i = *ii;
-    
+
     int tmp = i + 1;
     while (str[i] != 0 && str[i] != '\'' && str[i] != '\"')
         i++;
@@ -251,7 +251,7 @@ char **expand_variables(char *str)
 
     char **var_value;
     // get var name
-    int args[3] = { 0, 0, double_quot};
+    int args[3] = { 0, 0, double_quot };
     char *word = get_var_name(&i, args, &var_value, str);
     int free_word = args[1];
     int is_cutted = args[0];

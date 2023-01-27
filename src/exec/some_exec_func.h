@@ -3,16 +3,16 @@
 
 #define _POSIX_C_SOURCE 200809L
 
-#include "exec.h"
-#include "../variable/variable.h"
-#include "../parser/parser.h"
-#include "../variable/special_variable.h"
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
+
+#include "../parser/parser.h"
+#include "../variable/special_variable.h"
+#include "../variable/variable.h"
 #include "echo.h"
+#include "exec.h"
 
 int dot(struct Node *ast);
 int process_variable(struct Node *ast);
@@ -25,4 +25,3 @@ int process_until(struct Node *ast);
 int process_cmd(struct Node *ast);
 
 #endif /* ! SOME_EXEC_FUNC_H */
-

@@ -24,7 +24,8 @@ enum ast_type
     AST_CRET_FUNC
 };
 
-struct Node {
+struct Node
+{
     enum ast_type type;
     struct Node **children;
     int nb_children;

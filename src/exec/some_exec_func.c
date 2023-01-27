@@ -5,7 +5,7 @@ int dot(struct Node *ast)
     char *file2 = ast->children[1]->value;
     char *script2 = file_to_char(file2);
     if (script2 == NULL)
-        return TRUE;
+        return ERROR;
     struct Token *tokens2 = lexer(script2);
     free(script2);
     struct Node *ast2 = NULL;
@@ -13,7 +13,7 @@ int dot(struct Node *ast)
     free_lexer(tokens2);
     if (res)
         return ERROR;
-    int r = node_type(ast2); 
+    int r = node_type(ast2);
     free_ast(ast2);
     return r;
 }
@@ -91,7 +91,7 @@ int process_if(struct Node *ast)
 int process_for(struct Node *ast)
 {
     int r = TRUE;
-    //TODO SUPR afer exit for
+    // TODO SUPR afer exit for
     struct Node *tmp = ast->children[0]->children[0]->children[0];
     for (int i = 0; i < tmp->nb_children; i++)
     {
@@ -101,7 +101,7 @@ int process_for(struct Node *ast)
         {
             modify_value(var_list, ast->value, expanded[j]);
             r = node_type(ast->children[1]);
-            //error
+            // error
             if (r >= ERROR)
             {
                 int k = 0;

@@ -3,16 +3,16 @@
 
 #define _POSIX_C_SOURCE 200809L
 
-#include "some_exec_func.h"
-#include "../variable/variable.h"
-#include "../parser/parser.h"
-#include "../variable/special_variable.h"
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
+
+#include "../parser/parser.h"
+#include "../variable/special_variable.h"
+#include "../variable/variable.h"
 #include "echo.h"
+#include "some_exec_func.h"
 
 extern struct variable_list *var_list;
 extern char **input_arguments;

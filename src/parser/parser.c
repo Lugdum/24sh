@@ -1,9 +1,10 @@
 #include "parser.h"
-#include "function.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "function.h"
 
 extern struct Function *functions;
 
@@ -20,11 +21,10 @@ int parse(struct Token *token, struct Node **ast)
     // On est bon
     if (token && (token->type == EF || token->type == NL))
         return res;
-    
+
     // Erreur de syntax
     return 2;
 }
-
 
 int parseBlockCommand(struct Token **token, struct Node **ast)
 {
@@ -42,11 +42,11 @@ int parseBlockCommand(struct Token **token, struct Node **ast)
     int res = parseList(token, ast);
     block->children[0] = *ast;
     block->nb_children = 1;
-    if(res)
+    if (res)
         return res;
 
     // check for '}'
-    if((*token)->type != B_CL)
+    if ((*token)->type != B_CL)
         return 2;
     // Skip '}'
     (*token) = (*token)->next;
@@ -60,10 +60,9 @@ error:
     return 2;
 }
 
-
 // Parser les listes
 int parseList(struct Token **token, struct Node **ast)
-{        
+{
     // Parser le premier élément de la liste
     int res = parseAndOr(token, ast);
     if (res)
@@ -91,14 +90,17 @@ int parseList(struct Token **token, struct Node **ast)
         while ((*token)->type == SC || (*token)->type == NL)
             (*token) = (*token)->next;
 
-        if ((*token)->type == EF || (*token)->type == DONE || (*token)->type == ELSE || (*token)->type == FI || (*token)->type == B_CL)
+        if ((*token)->type == EF || (*token)->type == DONE
+            || (*token)->type == ELSE || (*token)->type == FI
+            || (*token)->type == B_CL)
             break;
 
         struct Node *tmp = NULL;
         if (parseAndOr(token, &tmp))
             goto error;
 
-        list->children = realloc(list->children, (i + 1) * sizeof(struct Node *));
+        list->children =
+            realloc(list->children, (i + 1) * sizeof(struct Node *));
         list->nb_children += 1;
         if (list->children == NULL)
             goto error;
@@ -119,34 +121,32 @@ error:
     return 2;
 }
 
-
 int parseRule(struct Token **token, struct Node **ast)
 {
     int res = 0;
     // S'il y a une rule la parser
-    if(*token != NULL)
+    if (*token != NULL)
     {
-        switch((*token)->type)
+        switch ((*token)->type)
         {
-            case IF:
-                res = parseIf(token, ast);
-                break;
-            case FOR:
-                res = parseFor(token, ast);
-                break;
-            case UNTIL:
-                res = parseUntil(token, ast);
-                break;
-            case WHILE:
-                res = parseWhile(token, ast);
-                break;
-            default:
-                break;
+        case IF:
+            res = parseIf(token, ast);
+            break;
+        case FOR:
+            res = parseFor(token, ast);
+            break;
+        case UNTIL:
+            res = parseUntil(token, ast);
+            break;
+        case WHILE:
+            res = parseWhile(token, ast);
+            break;
+        default:
+            break;
         }
     }
     return res;
 }
-
 
 // Parser les ! (ne sert a rien)
 int parseEM(struct Token **token, struct Node **ast)
@@ -162,7 +162,6 @@ int parseEM(struct Token **token, struct Node **ast)
     return 0;
 }
 
-
 // Parser les conditions AND OR
 int parseAndOr(struct Token **token, struct Node **ast)
 {
@@ -173,7 +172,8 @@ int parseAndOr(struct Token **token, struct Node **ast)
         return 2;
 
     // Parser le premier élément de AND_OR
-    if (((*token)->type == WORD || (*token)->type == EM) || (*token)->type == B_OP)
+    if (((*token)->type == WORD || (*token)->type == EM)
+        || (*token)->type == B_OP)
         res = parsePipeline(token, ast);
 
     // S'il y a plusieurs trucs
@@ -191,16 +191,16 @@ int parseAndOr(struct Token **token, struct Node **ast)
         struct Node *and_or = calloc(1, sizeof(struct Node));
         if (and_or == NULL)
             return 1;
-        switch(op)
+        switch (op)
         {
-            case AND:
-                and_or->type = AST_AND;
-                break;
-            case OR:
-                and_or->type = AST_OR;
-                break;
-            default:
-                break;
+        case AND:
+            and_or->type = AST_AND;
+            break;
+        case OR:
+            and_or->type = AST_OR;
+            break;
+        default:
+            break;
         }
         and_or->children = calloc(2, sizeof(struct Node *));
         if (and_or->children == NULL)
@@ -216,7 +216,6 @@ int parseAndOr(struct Token **token, struct Node **ast)
 
     return res;
 }
-
 
 // Parser les pipelines
 int parsePipeline(struct Token **token, struct Node **ast)
@@ -259,7 +258,7 @@ int parsePipeline(struct Token **token, struct Node **ast)
         (*token) = (*token)->next;
         if ((*token)->type == SC || (*token)->type == NL)
             (*token) = (*token)->next;
-        
+
         // S'il y a !
         enum ast_type type = AST_PIPELINE;
         if ((*token)->type == EM)
@@ -295,7 +294,6 @@ error:
     return 2;
 }
 
-
 // Parser les commandes
 int parseCommand(struct Token **token, struct Node **ast)
 {
@@ -322,13 +320,15 @@ int parseCommand(struct Token **token, struct Node **ast)
         command->function = found;
         command->type = AST_FUNCTION;
     }
-    if (strlen(*word) > 1 && (*word)[strlen(*word) - 2] == '(' && (*word)[strlen(*word) - 1] == ')')
+    if (strlen(*word) > 1 && (*word)[strlen(*word) - 2] == '('
+        && (*word)[strlen(*word) - 1] == ')')
     {
         in_func = 1;
         char *tw = *(word + strlen(*word) - 3);
         free(tw);
         found = findFunction(*word);
-        if ((found && parseFunctionReplace(token, found)) || (!found && parseFunction(token, *word)))
+        if ((found && parseFunctionReplace(token, found))
+            || (!found && parseFunction(token, *word)))
             goto error;
         command->type = AST_CRET_FUNC;
     }
@@ -354,7 +354,6 @@ error:
     free_ast(command);
     return 2;
 }
-
 
 // Parser les commandes simples
 int parseSimpleCommand(struct Token **token, struct Node **ast)
@@ -392,7 +391,6 @@ error:
     return 2;
 }
 
-
 // Parser les mots
 struct Node *parseWord(struct Token **token)
 {
@@ -402,7 +400,7 @@ struct Node *parseWord(struct Token **token)
     word->type = AST_ELEMENT;
     word->nb_children = 0;
     word->value = calloc(strlen((*token)->value) + 1, sizeof(char));
-    strcpy(word->value,((*token)->value));
+    strcpy(word->value, ((*token)->value));
     (*token) = (*token)->next;
     /*if (((*token)->type == SC || (*token)->type == NL))
         (*token) = (*token)->next;*/

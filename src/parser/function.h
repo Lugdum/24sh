@@ -5,7 +5,8 @@
 
 extern struct Function *fonctions;
 
-struct Function {
+struct Function
+{
     char *name;
     struct Node *body;
     int ref_count;
@@ -14,7 +15,7 @@ struct Function {
 
 int parseFunction(struct Token **token, char *name);
 int parseFunctionReplace(struct Token **token, struct Function *replace);
-struct Function* findFunction(const char* name);
+struct Function *findFunction(const char *name);
 void free_functions(struct Function *func);
 void printFunction(void);
 

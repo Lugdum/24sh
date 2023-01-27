@@ -1,16 +1,17 @@
 #include "function.h"
-#include "parser.h"
-#include "parser_print.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "parser.h"
+#include "parser_print.h"
+
 struct Function *functions;
 
 int parseFunction(struct Token **token, char *name)
 {
-    //skip NL
+    // skip NL
     while ((*token) != NULL && (*token)->type != B_OP)
         (*token) = (*token)->next;
     if (*token == NULL)
@@ -20,7 +21,7 @@ int parseFunction(struct Token **token, char *name)
     new_func->name = calloc(1, strlen(name) + 1);
     strncpy(new_func->name, name, strlen(name));
     new_func->ref_count = 1;
-    if(parseBlockCommand(token, &(new_func->body)))
+    if (parseBlockCommand(token, &(new_func->body)))
         return 2;
 
     new_func->next = functions;
@@ -28,10 +29,9 @@ int parseFunction(struct Token **token, char *name)
     return 0;
 }
 
-
 int parseFunctionReplace(struct Token **token, struct Function *replace)
 {
-    //skip NL
+    // skip NL
     while ((*token) != NULL && (*token)->type != B_OP)
         (*token) = (*token)->next;
     if (*token == NULL)
@@ -39,14 +39,13 @@ int parseFunctionReplace(struct Token **token, struct Function *replace)
 
     free_ast(replace->body);
     replace->body = NULL;
-    if(parseBlockCommand(token, &replace->body))
+    if (parseBlockCommand(token, &replace->body))
         return 2;
 
     return 0;
 }
 
-
-struct Function* findFunction(const char* name)
+struct Function *findFunction(const char *name)
 {
     struct Function *current = functions;
     while (current)
@@ -58,7 +57,6 @@ struct Function* findFunction(const char* name)
     return NULL;
 }
 
-
 void printFunction(void)
 {
     struct Function *current = functions;
@@ -68,7 +66,6 @@ void printFunction(void)
         current = current->next;
     }
 }
-
 
 void free_functions(struct Function *func)
 {

@@ -1,10 +1,10 @@
 #include "parser_rules.h"
-#include "parser.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "parser.h"
 
 // Parser les IFs
 int parseIf(struct Token **token, struct Node **if_node)
@@ -19,7 +19,9 @@ int parseIf(struct Token **token, struct Node **if_node)
 
     // Faire la condition
     (*if_node)->children = calloc(1, sizeof(struct Node *));
-    if ((*if_node)->children == NULL || parseAndOr(token, &(*if_node)->children[0]) || (*if_node)->children[0] == NULL)
+    if ((*if_node)->children == NULL
+        || parseAndOr(token, &(*if_node)->children[0])
+        || (*if_node)->children[0] == NULL)
         goto error;
     (*if_node)->nb_children = 1;
 
@@ -34,10 +36,11 @@ int parseIf(struct Token **token, struct Node **if_node)
         (*token) = (*token)->next;
 
     // Faire le then
-    (*if_node)->children = realloc((*if_node)->children, 2 * sizeof(struct Node *));
+    (*if_node)->children =
+        realloc((*if_node)->children, 2 * sizeof(struct Node *));
     if ((*if_node)->children == NULL)
         goto error;
-    (*if_node)->children[1] = NULL; //J'ai rajoute ca (valgrind)
+    (*if_node)->children[1] = NULL; // J'ai rajoute ca (valgrind)
     if (parseList(token, &(*if_node)->children[1]))
         goto error;
     if ((*if_node)->children[1] == NULL)
@@ -57,7 +60,7 @@ int parseIf(struct Token **token, struct Node **if_node)
             realloc((*if_node)->children, 3 * sizeof(struct Node *));
         if ((*if_node)->children == NULL)
             goto error;
-        (*if_node)->children[2] = NULL; //J'ai rajoute ca (valgrind)
+        (*if_node)->children[2] = NULL; // J'ai rajoute ca (valgrind)
         if (parseList(token, &(*if_node)->children[2]))
             goto error;
         if ((*if_node)->children[2] == NULL)
@@ -150,7 +153,8 @@ int parseWhile(struct Token **token, struct Node **ast)
 
     // La condition
     (*ast)->children = calloc(1, sizeof(struct Node *));
-    if ((*ast)->children == NULL || parseAndOr(token, &(*ast)->children[0]) || (*ast)->children[0] == NULL)
+    if ((*ast)->children == NULL || parseAndOr(token, &(*ast)->children[0])
+        || (*ast)->children[0] == NULL)
         goto error;
     (*ast)->nb_children = 1;
 
@@ -166,7 +170,7 @@ int parseWhile(struct Token **token, struct Node **ast)
     (*ast)->children = realloc((*ast)->children, 2 * sizeof(struct Node *));
     if ((*ast)->children == NULL)
         goto error;
-    (*ast)->children[1] = NULL; //J'ai rajoute ca (valgrind)
+    (*ast)->children[1] = NULL; // J'ai rajoute ca (valgrind)
     if (parseList(token, &(*ast)->children[1]))
         goto error;
     if ((*ast)->children[1] == NULL)
@@ -200,7 +204,8 @@ int parseUntil(struct Token **token, struct Node **ast)
 
     // La condition
     (*ast)->children = calloc(1, sizeof(struct Node *));
-    if ((*ast)->children == NULL || parseAndOr(token, &(*ast)->children[0]) || (*ast)->children[0] == NULL)
+    if ((*ast)->children == NULL || parseAndOr(token, &(*ast)->children[0])
+        || (*ast)->children[0] == NULL)
         goto error;
     (*ast)->nb_children = 1;
 

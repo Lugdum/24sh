@@ -215,7 +215,7 @@ struct Token *process(char *str, struct Token *tok)
         free(token);
         return tok;
     }
-    else 
+    else
         r = other_types(str, token);
     if (!r)
         r = other_other_types(str, token);
@@ -259,7 +259,7 @@ struct Token *lexer(char *input)
     int j = 0;
     bool quote = false;
     int i = 0;
-    char term[] = { ' ', ';', '\n', ',', '|', '&', '>', '<'};
+    char term[] = { ' ', ';', '\n', ',', '|', '&', '>', '<' };
     while (i < len)
     {
         // if # at the start of line then whole line is comment
