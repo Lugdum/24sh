@@ -1,11 +1,12 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "variable.h"
-#include "special_variable.h"
-#include "../exec/exec.h"
 
 #include <stdlib.h>
 #include <string.h>
+
+#include "../exec/exec.h"
+#include "special_variable.h"
 
 char **find_value(struct variable_list *list, char *name)
 {
@@ -18,7 +19,8 @@ char **find_value(struct variable_list *list, char *name)
 }
 void insert_value(struct variable_list *list, char *name, char **value)
 {
-    list->list = realloc(list->list, (1 + list->size) * sizeof(struct variable_list));
+    list->list =
+        realloc(list->list, (1 + list->size) * sizeof(struct variable_list));
 
     int s = list->size;
 
@@ -30,7 +32,8 @@ void insert_value(struct variable_list *list, char *name, char **value)
     char *word = value[k];
     while (word)
     {
-        list->list[s].value = realloc(list->list[s].value, sizeof(char *) * (k + 2));
+        list->list[s].value =
+            realloc(list->list[s].value, sizeof(char *) * (k + 2));
         list->list[s].value[k] = malloc(strlen(word) + 1);
         list->list[s].value[k] = strcpy(list->list[s].value[k], word);
         k++;
@@ -55,29 +58,31 @@ void modify_value_multiple(struct variable_list *list, char *name, char **value)
         return;
     if (find_value(list, name))
     {
-    for (int i = 0; i < list->size; i++)
-    {
-        if (!strcmp(name, list->list[i].name))
+        for (int i = 0; i < list->size; i++)
         {
-            int k = 0;
-            while (list->list[i].value[k])
+            if (!strcmp(name, list->list[i].name))
             {
-                free(list->list[i].value[k]);
-                k++;
+                int k = 0;
+                while (list->list[i].value[k])
+                {
+                    free(list->list[i].value[k]);
+                    k++;
+                }
+                k = 0;
+                char *word = value[k];
+                while (word)
+                {
+                    list->list[i].value =
+                        realloc(list->list[i].value, sizeof(char *) * (k + 2));
+                    list->list[i].value[k] = malloc(strlen(word) + 1);
+                    list->list[i].value[k] =
+                        strcpy(list->list[i].value[k], word);
+                    k++;
+                    word = value[k];
+                }
+                list->list[i].value[k] = NULL;
             }
-            k = 0;
-            char *word = value[k];
-            while (word)
-            {
-                list->list[i].value = realloc(list->list[i].value, sizeof(char *) * (k + 2));
-                list->list[i].value[k] = malloc(strlen(word) + 1);
-                list->list[i].value[k] = strcpy(list->list[i].value[k], word);
-                k++;
-                word = value[k];
-            }
-            list->list[i].value[k] = NULL;
         }
-    }
     }
     else
     {
@@ -111,12 +116,12 @@ char **expand_variables(char *str)
     int size_ret = 0;
     char **ret = NULL;
 
-    //some flags
+    // some flags
     int quot = 0;
     int double_quot = 0;
     int is_var = 0;
     int is_cutted = 0;
-    
+
     int j = 0;
     int i;
     for (i = 0; str[i] != '\0'; i++)
@@ -153,12 +158,12 @@ char **expand_variables(char *str)
     char **var_value;
     int free_word = 0;
     char *word;
-    //get var name
+    // get var name
     while (str[i] != 0 && str[i] != '\'' && str[i] != '\"')
         i++;
-    //if no name
+    // if no name
     if (i == tmp)
-        word ="$";
+        word = "$";
     else
     {
         char *tmp_var_name = calloc(i - tmp + 2, 1);
@@ -166,7 +171,7 @@ char **expand_variables(char *str)
         char *tmp_trash;
         char *var_name = strtok_r(tmp_var_name, "{}", &tmp_trash);
         var_value = find_value(var_list, var_name);
-        
+
         if (!strcmp(var_name, "RANDOM") || !strcmp(var_name, "(RANDOM)"))
         {
             word = expand_random();
@@ -188,14 +193,14 @@ char **expand_variables(char *str)
         }
         free(tmp_var_name);
     }
-    //copy var value to return string if quoted
+    // copy var value to return string if quoted
     cur = realloc(cur, size_cur + strlen(word));
     strcpy(cur + j, word);
-    
+
     ret = malloc(sizeof(char *) * 2);
     ret[0] = cur;
     ret[1] = NULL;
-    
+
     if (free_word)
         free(word);
     if (!is_cutted)
@@ -210,7 +215,8 @@ char **expand_variables(char *str)
         word = strtok_r(tmp, " ", &save);
         if (size_ret == 0)
         {
-            ret[size_ret] = realloc(ret[size_ret], strlen(word) + strlen(ret[size_ret]) + 1);
+            ret[size_ret] = realloc(ret[size_ret],
+                                    strlen(word) + strlen(ret[size_ret]) + 1);
             strcpy(ret[size_ret] + strlen(ret[size_ret]), word);
             word = strtok_r(NULL, " ", &save);
             size_ret += 1;
@@ -259,4 +265,3 @@ void free_list(struct variable_list *list)
     free(list->list);
     free(list);
 }
-
