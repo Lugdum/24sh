@@ -412,8 +412,10 @@ void free_lexer(struct Token *token)
 
 char *file_to_char(char *file)
 {
-    char *script = malloc(sizeof(char)), *line = NULL;
-    size_t n = 1, len = 0;
+    char *script = malloc(sizeof(char));
+    char *line = NULL;
+    size_t n = 1;
+    size_t len = 0;
     //ssize_t getline();
     FILE *fp = fopen(file, "r");
     if (fp == NULL)
