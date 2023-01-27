@@ -1,10 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
 #include "lexer.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 struct Token *no_double(struct Token *tok)
 {
@@ -26,7 +26,7 @@ struct Token *no_double(struct Token *tok)
         {
             struct Token *tmp = tok->next;
             pre->next = tok->next;
-            
+
             free(tok->value);
             free(tok);
 
@@ -52,11 +52,11 @@ void fix_chevre(struct Token *tok)
             pre->type = WORD;
             pre->value = calloc(4, 1);
             int rm = 1;
-            if(tok->type == CHEVRER)
+            if (tok->type == CHEVRER)
                 strcpy(pre->value, ">>\0");
-            else if(tok->type == ESP)
+            else if (tok->type == ESP)
                 strcpy(pre->value, ">&\0");
-            else if(tok->type == PIPE)
+            else if (tok->type == PIPE)
                 strcpy(pre->value, ">|\0");
             else
             {
@@ -76,9 +76,9 @@ void fix_chevre(struct Token *tok)
             pre->type = WORD;
             pre->value = calloc(4, 1);
             int rm = 1;
-            if(tok->type == CHEVRER)
+            if (tok->type == CHEVRER)
                 strcpy(pre->value, "<>\0");
-            else if(tok->type == ESP)
+            else if (tok->type == ESP)
                 strcpy(pre->value, "<&\0");
             else
             {
@@ -126,20 +126,10 @@ struct Token *process_end_of_file(struct Token *tok)
     return token;
 }
 
-struct Token *process(char *str, struct Token *tok)
+int other_types(char *str, struct Token *token)
 {
-    struct Token *token = calloc(1, sizeof(struct Token));
-    token->value = NULL;
-    token->next = NULL;
-
-    if (strlen(str) == 0)
-    {
-        free(token);
-        return tok;
-    }
-    else if (!strcmp("if", str))
-        token->type = IF;
-    else if (!strcmp("then", str))
+    int r = 1;
+    if (!strcmp("then", str))
         token->type = THEN;
     else if (!strcmp("elif", str))
         token->type = ELIF;
@@ -173,8 +163,16 @@ struct Token *process(char *str, struct Token *tok)
         token->type = NL;
     else if (!strcmp("'", str))
         token->type = SQ;
-    else if (!strcmp("&&", str))
-        token->type = AND;
+    else
+        r = 0;
+    return r;
+}
+
+int other_other_types(char *str, struct Token *token)
+{
+    int r = 1;
+    if (!strcmp("if", str))
+        token->type = IF;
     else if (!strcmp("||", str))
         token->type = OR;
     else if (!strcmp("for", str))
@@ -193,12 +191,35 @@ struct Token *process(char *str, struct Token *tok)
         token->type = WHILE;
     else if (!strcmp("until", str))
         token->type = UNTIL;
+    else if (!strcmp("&&", str))
+        token->type = AND;
+    else
+        r = 0;
+    return r;
+}
+
+struct Token *process(char *str, struct Token *tok)
+{
+    struct Token *token = calloc(1, sizeof(struct Token));
+    token->value = NULL;
+    token->next = NULL;
+    int r = 1;
+
+    if (strlen(str) == 0)
+    {
+        free(token);
+        return tok;
+    }
     else if (!strcmp(" ", str))
     {
         free(token);
         return tok;
     }
-    else
+    else 
+        r = other_types(str, token);
+    if (!r)
+        r = other_other_types(str, token);
+    if (!r)
     {
         if (str[strlen(str) - 1] == '\\')
             str[strlen(str) - 1] = '\0';
@@ -215,12 +236,22 @@ struct Token *process(char *str, struct Token *tok)
     return token;
 }
 
+int is_in(char c, char *str)
+{
+    int i = 0;
+    while (str[i])
+    {
+        if (c == str[i])
+            return 1;
+        i++;
+    }
+    return 0;
+}
+
 struct Token *lexer(char *input)
 {
-   // printf("%s\n", input);
+    // printf("%s\n", input);
     struct Token *out = calloc(1, sizeof(struct Token));
-    if (!out)
-        return NULL;
     struct Token *cur_tok = out;
 
     int len = strlen(input);
@@ -228,61 +259,40 @@ struct Token *lexer(char *input)
     int j = 0;
     bool quote = false;
     int i = 0;
-    char past = 0;
+    char term[] = { ' ', ';', '\n', ',', '|', '&', '>', '<'};
     while (i < len)
     {
-        //if # at the start of line then whole line is comment
-        if (input[i] == '#' && (past == '\n' || i == 0))
+        // if # at the start of line then whole line is comment
+        if (input[i] == '#' && (i == 0 || input[i]))
         {
             while (input[i] != '\n')
                 i++;
-            i++;
-            continue;
         }
-        //if " but no \ then start/end quoting 
-        if ((input[i] == '\"' || input[i] == '\'') && input[i-1] != '\\')
+        // if " but no \ then start/end quoting
+        if ((input[i] == '\"' || input[i] == '\'') && input[i - 1] != '\\')
         {
             quote = !quote;
             cur[j] = input[i];
             j++;
-            
-            i++;
-            continue;
         }
-        //if \ or \r then skip the char
-        if ((input[i] == '\\' && !quote) || input[i] == '\r')
+        // if space ; or \n then end token exept if quoted
+        if (is_in(input[i], term) && !quote)
         {
-            i++;
-            continue;
+            cur[j] = '\0';
+            cur_tok = process(cur, cur_tok);
+            cur[0] = input[i];
+            if (input[i] == '\n')
+                cur[0] = ';';
+            cur[1] = '\0';
+            cur_tok = process(cur, cur_tok);
+            j = 0;
         }
-        //if space ; or \n then end token exept if quoted
-        if (input[i] == ' ' || input[i] == ';' || input[i] == '\n' 
-                || input[i] == ','|| input[i] == '|' || input[i] == '&'
-                || input[i] == '>'|| input[i] == '<')
-        {
-            if (!quote)
-            {
-                cur[j] = '\0';
-                cur_tok = process(cur, cur_tok);
-                cur[0] = input[i];
-                if (input[i] == '\n')
-                    cur[0] = ';';
-                cur[1] = '\0';
-                cur_tok = process(cur, cur_tok);
-                j = 0;
-            }
-            else
-            {
-                cur[j] = input[i];
-                j++;
-            }
-        }
-        else
+        // if \ or \r then skip the char
+        else if (!((input[i] == '\\' && !quote) || input[i] == '\r'))
         {
             cur[j] = input[i];
             j++;
         }
-        past = input[i];
         i++;
     }
     cur[j] = '\0';
@@ -416,12 +426,12 @@ char *file_to_char(char *file)
     char *line = NULL;
     size_t n = 1;
     size_t len = 0;
-    //ssize_t getline();
+    // ssize_t getline();
     FILE *fp = fopen(file, "r");
     if (fp == NULL)
     {
         fprintf(stderr, "An error occured when openning %s\n", file);
-        free(script); 
+        free(script);
         return NULL;
     }
     while (getline(&line, &len, fp) != -1)
@@ -447,6 +457,6 @@ char *file_to_char(char *file)
     if (line)
         free(line);
     fclose(fp);
-    script[n -  1] = '\0';
+    script[n - 1] = '\0';
     return script;
 }
