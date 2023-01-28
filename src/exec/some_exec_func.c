@@ -31,7 +31,7 @@ int process_variable(struct Node *ast)
     char *val = strtok_r(NULL, "=\"\'", &save);
     if (val == NULL)
         return ERROR;
-    modify_value(var_list, prefix, val);
+    modify_value(prefix, val);
     return TRUE;
 }
 
@@ -101,7 +101,7 @@ int process_for(struct Node *ast)
         int j = 0;
         while (expanded[j])
         {
-            modify_value(var_list, ast->value, expanded[j]);
+            modify_value(ast->value, expanded[j]);
             r = node_type(ast->children[1]);
             // error
             if (r >= ERROR)

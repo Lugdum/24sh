@@ -139,7 +139,7 @@ int node_type(struct Node *ast)
 void comput_special_variables(void)
 {
     char **temp = expand_at();
-    modify_value_multiple(var_list, "@", temp);
+    modify_value_multiple("@", temp);
     int i = 0;
     if (temp)
     {
@@ -156,27 +156,27 @@ void comput_special_variables(void)
         char buffer[100];
         sprintf(buffer, "%d", i + 1);
         tmp = expand_n(i);
-        modify_value(var_list, buffer, tmp);
+        modify_value(buffer, tmp);
         free(tmp);
     }
 
     tmp = expand_star();
-    modify_value(var_list, "*", tmp);
+    modify_value("*", tmp);
     free(tmp);
     tmp = expand_question_mark();
-    modify_value(var_list, "?", tmp);
+    modify_value("?", tmp);
     free(tmp);
     tmp = expand_dollar();
-    modify_value(var_list, "$", tmp);
+    modify_value("$", tmp);
     free(tmp);
     tmp = expand_sharp();
-    modify_value(var_list, "#", tmp);
+    modify_value("#", tmp);
     free(tmp);
     tmp = expand_uid();
-    modify_value(var_list, "UID", tmp);
+    modify_value("UID", tmp);
     free(tmp);
     tmp = expand_pwd();
-    modify_value(var_list, "PWD", tmp);
+    modify_value("PWD", tmp);
     free(tmp);
 
     srand(time(NULL));
@@ -184,6 +184,7 @@ void comput_special_variables(void)
 
 int main_exec(struct Node *ast, char **input_args)
 {
+
     define_var_list();
     input_arguments = input_args;
 

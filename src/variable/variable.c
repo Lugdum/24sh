@@ -44,18 +44,20 @@ void insert_value(struct variable_list *list, char *name, char **value)
     list->list[s].value[k] = NULL;
     list->size += 1;
 }
-void modify_value(struct variable_list *list, char *name, char *value)
+void modify_value(char *name, char *value)
 {
     if (value == NULL || value[0] == '\0')
         return;
     char **tmp = malloc(2 * sizeof(char *));
     tmp[0] = value;
     tmp[1] = NULL;
-    modify_value_multiple(list, name, tmp);
+    modify_value_multiple(name, tmp);
     free(tmp);
 }
-void modify_value_multiple(struct variable_list *list, char *name, char **value)
+
+void modify_value_multiple(char *name, char **value)
 {
+    struct variable_list *list = var_list;
     if (value == NULL || value[0] == NULL)
         return;
     if (find_value(list, name))
