@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 
-struct variable_list *var_list;
 
 void define_var_list(void)
 {
