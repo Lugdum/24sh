@@ -236,12 +236,13 @@ struct Token *process(char *str, struct Token *tok)
     return token;
 }
 
-int is_in(char c, char *str)
+int is_term(char c)
 {
+    char term[] = { ' ', ';', '\n', ',', '|', '&', '>', '<' , 0};
     int i = 0;
-    while (str[i])
+    while (term[i])
     {
-        if (c == str[i])
+        if (c == term[i])
             return 1;
         i++;
     }
@@ -259,7 +260,6 @@ struct Token *lexer(char *input)
     int j = 0;
     bool quote = false;
     int i = 0;
-    char term[] = { ' ', ';', '\n', ',', '|', '&', '>', '<' };
     while (i < len)
     {
         // if # at the start of line then whole line is comment
@@ -276,7 +276,7 @@ struct Token *lexer(char *input)
             j++;
         }
         // if space ; or \n then end token exept if quoted
-        if (is_in(input[i], term) && !quote)
+        if (is_term(input[i]) && !quote)
         {
             cur[j] = '\0';
             cur_tok = process(cur, cur_tok);
