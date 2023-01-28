@@ -14,6 +14,8 @@
 #include "echo.h"
 #include "exec.h"
 
+extern char **input_arguments;
+
 int dot(struct Node *ast);
 int process_variable(struct Node *ast);
 int process_function(struct Node *ast);

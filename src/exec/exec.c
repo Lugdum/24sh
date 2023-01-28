@@ -1,4 +1,3 @@
-
 #include "exec.h"
 
 struct variable_list *var_list;
@@ -60,6 +59,7 @@ int process_pipeline(struct Node *ast)
     int r = node_type(ast->children[0]);
     if (ast->nb_children == 2)
         r = node_type(ast->children[1]);
+    exit_status = r;
     return r;
 }
 int process_em(struct Node *ast)
@@ -141,7 +141,7 @@ int node_type(struct Node *ast)
     return r;
 }
 
-void comput_special_variables()
+void comput_special_variables(void)
 {
     char **temp = expand_at();
     modify_value_multiple(var_list, "@", temp);

@@ -6,7 +6,23 @@
 #include <unistd.h>
 
 #include "../exec/exec.h"
-#include "variable.h"
+
+void free_list(struct variable_list *list)
+{
+    for (int i = 0; i < list->size; i++)
+    {
+        int k = 0;
+        while (list->list[i].value[k])
+        {
+            free(list->list[i].value[k]);
+            k++;
+        }
+        free(list->list[i].value);
+        free(list->list[i].name);
+    }
+    free(list->list);
+    free(list);
+}
 
 char *expand_star(void)
 {

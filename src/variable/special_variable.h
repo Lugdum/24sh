@@ -1,6 +1,9 @@
 #ifndef SPECIAL_VARIABLE_H
 #define SPECIAL_VARIABLE_H
 
+#include "variable.h"
+
+void free_list(struct variable_list *list);
 char **expand_at(void);
 char *expand_star(void);
 char *expand_question_mark(void);

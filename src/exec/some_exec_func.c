@@ -1,5 +1,7 @@
 #include "some_exec_func.h"
 
+extern char **input_arguments;
+
 int dot(struct Node *ast)
 {
     char *file2 = ast->children[1]->value;
