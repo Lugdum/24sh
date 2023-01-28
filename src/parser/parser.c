@@ -218,9 +218,8 @@ int parseAndOr(struct Token **token, struct Node **ast)
 }
 
 // Parser les pipelines
-int parsePipeline(struct Token **token, struct Node **ast)
+struct Node *inutile(struct Token **token)
 {
-    // Parser le premier element de PIPELINE
     struct Node *pipeline = calloc(1, sizeof(struct Node));
     pipeline->children = calloc(1, sizeof(struct Node *));
     pipeline->nb_children = 1;
@@ -232,6 +231,13 @@ int parsePipeline(struct Token **token, struct Node **ast)
     }
     else
         pipeline->type = AST_PIPELINE;
+    return pipeline;
+}
+
+int parsePipeline(struct Token **token, struct Node **ast)
+{
+    // Parser le premier element de PIPELINE
+    struct Node *pipeline = inutile(token);
 
     int res = 0;
     if ((*token)->type == B_OP)
@@ -272,15 +278,9 @@ int parsePipeline(struct Token **token, struct Node **ast)
 
         // Creer le noeud PIPELINE et donner les commandes a droite et a gauche
         struct Node *pipeline = calloc(1, sizeof(struct Node));
-        if (pipeline == NULL)
-            return 1;
         pipeline->type = type;
         pipeline->children = calloc(2, sizeof(struct Node *));
-        if (pipeline->children == NULL)
-        {
-            free(pipeline);
-            return 1;
-        }
+        
         pipeline->children[0] = *ast;
         pipeline->children[1] = right;
         pipeline->nb_children = 2;
@@ -298,8 +298,6 @@ error:
 int parseCommand(struct Token **token, struct Node **ast)
 {
     struct Node *command = calloc(1, sizeof(struct Node));
-    if (command == NULL)
-        return 2;
 
     // Parser le premier element de la commande
     (command)->children = calloc(1, sizeof(struct Node *));

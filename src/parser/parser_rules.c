@@ -7,6 +7,52 @@
 #include "parser.h"
 
 // Parser les IFs
+int parseElse(struct Token **token, struct Node **if_node)
+{
+    if ((*token)->type == SC || (*token)->type == NL)
+        (*token) = (*token)->next;
+    if ((*token) != NULL && (*token)->type == ELSE)
+    {
+        (*token) = (*token)->next;
+        if ((*token)->type == SC || (*token)->type == NL)
+            (*token) = (*token)->next;
+
+        (*if_node)->children = realloc((*if_node)->children, 3 * sizeof(struct Node *));
+        if ((*if_node)->children == NULL)
+            goto error;
+        (*if_node)->children[2] = NULL; 
+        if (parseList(token, &(*if_node)->children[2]))
+            goto error;
+        if ((*if_node)->children[2] == NULL)
+            goto error;
+        (*if_node)->nb_children = 3;
+    }
+
+    return 0;
+
+error:
+    free_ast(*if_node);
+    return 2;
+}
+
+int parseThen(struct Token **token, struct Node **if_node)
+{
+    (*if_node)->children =
+        realloc((*if_node)->children, 2 * sizeof(struct Node *));
+    if ((*if_node)->children == NULL)
+        goto error;
+    (*if_node)->children[1] = NULL; 
+    if (parseList(token, &(*if_node)->children[1]))
+        goto error;
+    if ((*if_node)->children[1] == NULL)
+        goto error;
+    (*if_node)->nb_children = 2;
+    return 0;
+error:
+    free_ast(*if_node);
+    return 2;
+}
+
 int parseIf(struct Token **token, struct Node **if_node)
 {
     // Creer le noeud if
@@ -36,37 +82,12 @@ int parseIf(struct Token **token, struct Node **if_node)
         (*token) = (*token)->next;
 
     // Faire le then
-    (*if_node)->children =
-        realloc((*if_node)->children, 2 * sizeof(struct Node *));
-    if ((*if_node)->children == NULL)
+    if (parseThen(token, if_node))
         goto error;
-    (*if_node)->children[1] = NULL; // J'ai rajoute ca (valgrind)
-    if (parseList(token, &(*if_node)->children[1]))
-        goto error;
-    if ((*if_node)->children[1] == NULL)
-        goto error;
-    (*if_node)->nb_children = 2;
 
     // Faire le else s'il y en a un
-    if ((*token)->type == SC || (*token)->type == NL)
-        (*token) = (*token)->next;
-    if ((*token) != NULL && (*token)->type == ELSE)
-    {
-        (*token) = (*token)->next;
-        if ((*token)->type == SC || (*token)->type == NL)
-            (*token) = (*token)->next;
-
-        (*if_node)->children =
-            realloc((*if_node)->children, 3 * sizeof(struct Node *));
-        if ((*if_node)->children == NULL)
-            goto error;
-        (*if_node)->children[2] = NULL; // J'ai rajoute ca (valgrind)
-        if (parseList(token, &(*if_node)->children[2]))
-            goto error;
-        if ((*if_node)->children[2] == NULL)
-            goto error;
-        (*if_node)->nb_children = 3;
-    }
+    if (parseElse(token, if_node))
+        goto error;
 
     // Verifier que le if termine par fi
     if ((*token)->type == SC || (*token)->type == NL)
@@ -81,6 +102,7 @@ error:
     free_ast(*if_node);
     return 2;
 }
+
 
 // Parser les for
 int parseFor(struct Token **token, struct Node **ast)

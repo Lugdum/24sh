@@ -34,7 +34,7 @@ void print_node(struct Node *node, int parent, FILE *f)
     int current_node = node_count++;
     switch (node->type)
     {
-    case AST_INPUT:
+    /*case AST_INPUT:
         fprintf(f, "node%d [label=\"AST_INPUT\"];\n", current_node);
         break;
     case AST_OR:
@@ -69,7 +69,7 @@ void print_node(struct Node *node, int parent, FILE *f)
         break;
     case AST_WHILE:
         fprintf(f, "node%d [label=\"WHILE\"];\n", current_node);
-        break;
+        break;*/
     case AST_UNTIL:
         fprintf(f, "node%d [label=\"UNTIL\"];\n", current_node);
         break;
