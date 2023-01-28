@@ -285,8 +285,6 @@ struct Token *lexer(char *input)
         if ((input[i] == '\"' || input[i] == '\'') && input[i - 1] != '\\')
         {
             quote = !quote;
-            cur[j] = input[i];
-            j++;
         }
         // if space ; or \n then end token exept if quoted
         if (is_term(input[i]) && !quote)

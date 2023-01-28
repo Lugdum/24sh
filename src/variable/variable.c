@@ -96,6 +96,8 @@ void modify_value_multiple(char *name, char **value)
 
 char *get_string(char **var)
 {
+    if (!var)
+        return NULL;
     char *r = NULL;
     int len = 0;
     int k = 0;
@@ -108,7 +110,8 @@ char *get_string(char **var)
         len++;
         k++;
     }
-    r[len - 1] = '\0';
+    if (len > 0)
+        r[len - 1] = '\0';
     return r;
 }
 
@@ -202,6 +205,8 @@ void get_if_cutted(char **var_value, char ***rett, int *size_rett)
     char *word = NULL;
     int size_ret = *size_rett;
     int var_i = 0;
+    if (var_value)
+    {
     while (var_value[var_i])
     {
         char *save;
@@ -226,6 +231,7 @@ void get_if_cutted(char **var_value, char ***rett, int *size_rett)
         }
         var_i++;
         free(tmp);
+    }
     }
     *rett = ret;
     *size_rett = size_ret;
@@ -253,7 +259,7 @@ char **expand_variables(char *str)
         return ret;
     }
 
-    char **var_value;
+    char **var_value = NULL;
     // get var name
     int args[3] = { 0, 0, double_quot };
     char *word = get_var_name(&i, args, &var_value, str);

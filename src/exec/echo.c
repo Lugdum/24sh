@@ -179,7 +179,7 @@ int echo(struct Node *ast)
         // Remplace les séquences d'échappement précédées de \ par leurs
         // équivalents ASCII
         char *value = expand_variables_single(ast->children[i]->value);
-        for (int j = 0; value[j] != '\0'; j++)
+        for (int j = 0; value && value[j] != '\0'; j++)
         {
             if (value[j] == '\\' && !flags[2] && flags[1])
             {
@@ -196,7 +196,7 @@ int echo(struct Node *ast)
             len++;
         }
         // Ajoute un espace entre chaque argument, sauf pour le dernier
-        if (i < child_num - son)
+        if (value && i < child_num - son)
         {
             to_print = realloc(to_print, len + 1);
             to_print[len] = ' ';
