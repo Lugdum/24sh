@@ -8,6 +8,8 @@
 #include "../exec/exec.h"
 #include "special_variable.h"
 
+struct variable_list *var_list;
+
 char **find_value(struct variable_list *list, char *name)
 {
     for (int i = 0; i < list->size; i++)
@@ -286,20 +288,4 @@ char *expand_variables_single(char *str)
     }
     free(ret);
     return r;
-}
-void free_list(struct variable_list *list)
-{
-    for (int i = 0; i < list->size; i++)
-    {
-        int k = 0;
-        while (list->list[i].value[k])
-        {
-            free(list->list[i].value[k]);
-            k++;
-        }
-        free(list->list[i].value);
-        free(list->list[i].name);
-    }
-    free(list->list);
-    free(list);
 }

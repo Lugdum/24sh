@@ -14,8 +14,6 @@
 #include "echo.h"
 #include "some_exec_func.h"
 
-extern struct variable_list *var_list;
-extern char **input_arguments;
 extern int exit_status;
 
 int main_exec(struct Node *ast, char **input_args);

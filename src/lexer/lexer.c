@@ -41,14 +41,14 @@ struct Token *no_double(struct Token *tok)
     return begin;
 }
 
-void fix_chevre(struct Token *tok)
+int sub_fix_chevre(struct Token **pree, struct Token **tokk)
 {
-    struct Token *pre = tok;
-    tok = tok->next;
-    while (tok)
-    {
+    int r = 0;
+    struct Token *tok = *tokk;
+    struct Token *pre = *pree;
         if (pre->type == CHEVRER)
         {
+            r = 1;
             pre->type = WORD;
             pre->value = calloc(4, 1);
             int rm = 1;
@@ -73,6 +73,7 @@ void fix_chevre(struct Token *tok)
         }
         else if (pre->type == CHEVREL)
         {
+            r = 1;
             pre->type = WORD;
             pre->value = calloc(4, 1);
             int rm = 1;
@@ -93,7 +94,19 @@ void fix_chevre(struct Token *tok)
                 tok = pre->next;
             }
         }
-        else if (pre->type == ESP && tok->type == ESP)
+        *tokk = tok;
+        *pree = pre;
+        return r;
+}
+
+void fix_chevre(struct Token *tok)
+{
+    struct Token *pre = tok;
+    tok = tok->next;
+    while (tok)
+    {
+        int r = sub_fix_chevre(&pre, &tok);
+        if (!r && (pre->type == ESP && tok->type == ESP))
         {
             pre->next = tok->next;
             free(tok->value);
