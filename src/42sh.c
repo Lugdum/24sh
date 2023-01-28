@@ -84,6 +84,7 @@ int main(int argc, char **argv)
     {
         free_lexer(tokens);
         free_functions(functions);
+        fprintf(stderr, "Grammar error");
         return res;
     }
 
