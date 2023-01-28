@@ -49,6 +49,4 @@ struct Token *lexer(char *arg);
 void free_lexer(struct Token *token);
 char *file_to_char(char *file);
 
-void print_token(struct Token *token);
-
 #endif /* !LEXER_H */

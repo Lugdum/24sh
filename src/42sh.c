@@ -74,8 +74,6 @@ int main(int argc, char **argv)
     // load token from diff sources
     // from stdin
     // print tokens
-    if (argc >= 3 && argv[argc - 1][0] == 't')
-        print_token(tokens);
 
     // Parse tokens
     struct Node *ast = NULL;
