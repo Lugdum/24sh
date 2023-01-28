@@ -22,7 +22,6 @@ int process_pipe(struct Node *ast)
     if (r >= ERROR)
         return r;
     r = node_type(ast->children[1]);
-    exit_status = r;
     return r;
 }
 
