@@ -67,7 +67,7 @@ char **expand_at(void)
 char *expand_question_mark(void)
 {
     char *b = calloc(100, 1);
-    sprintf(b, "%d", exit_status);
+    sprintf(b, "%d", 0);
     return b;
 }
 

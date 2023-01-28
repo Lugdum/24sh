@@ -1,8 +1,6 @@
 #include "exec.h"
 
-struct variable_list *var_list;
 char **input_arguments;
-int exit_status;
 
 int process_list(struct Node *ast)
 {
@@ -58,7 +56,6 @@ int process_pipeline(struct Node *ast)
     int r = node_type(ast->children[0]);
     if (ast->nb_children == 2)
         r = node_type(ast->children[1]);
-    exit_status = r;
     return r;
 }
 int process_em(struct Node *ast)
@@ -70,7 +67,6 @@ int process_em(struct Node *ast)
         r = FALSE;
     else if (r == FALSE)
         r = TRUE;
-    exit_status = r;
     return r;
 }
 int other_node_type(struct Node *ast)
@@ -188,11 +184,8 @@ void comput_special_variables(void)
 
 int main_exec(struct Node *ast, char **input_args)
 {
-    var_list = calloc(1, sizeof(struct variable_list));
-    var_list->size = 0;
-    var_list->list = NULL;
+    define_var_list();
     input_arguments = input_args;
-    exit_status = 0;
 
     comput_special_variables();
 

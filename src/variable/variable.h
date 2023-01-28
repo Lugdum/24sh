@@ -2,6 +2,7 @@
 #define VARIABLE_H
 
 extern struct variable_list *var_list;
+
 struct variable_list
 {
     int size;

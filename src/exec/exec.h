@@ -11,6 +11,7 @@
 #include "../parser/parser.h"
 #include "../variable/special_variable.h"
 #include "../variable/variable.h"
+#include "../variable/var.h"
 #include "echo.h"
 #include "some_exec_func.h"
 
