@@ -67,11 +67,11 @@ Il y a trois manières d'utiliser 24 sh:
 - [X] "while" and "until" commands 
 - [X] Operators
 - [ ] Double Quote and Escape Character
-- [ ] Variables
+- [X] Variables
 - [X] "for" commands
 
 ## Step 3
-- [X] Built-in Commands
+- [ ] Built-in Commands
 - [X] Commands blocks
 - [X] Functions
 - [X] Commands Substitution 
