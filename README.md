@@ -49,23 +49,35 @@ Il y a trois manières d'utiliser 24 sh:
 
 # Steps
 ## Step 1
-- [X] main
-- [X] parser
-- [X] parser_rules
-- [X] parser_print
-- [X] lexer
-- [X] variable
-- [X] exec
-- [X] echo
-- [X] test_suite
+- [X] Usage
+- [X] Exit Status and Errors
+- [X] Simple Commands
+- [X] Command lists
+- [X] "if" commands
+- [X] Coumpond lists
+- [X] Single quotes
+- [X] True and False builtins
+- [X] echo built-in
+- [X] Comments
 
 ## Step 2
-- [X] main
-- [X] parser
-- [X] parser_rules
-- [X] parser_print
-- [X] lexer
-- [ ] variable
-- [ ] exec
-- [X] echo
-- [ ] test_suite
+- [X] Redirections
+- [X] Pipelines
+- [X] Negation
+- [X] "while" and "until" commands 
+- [X] Operators
+- [ ] Double Quote and Escape Character
+- [ ] Variables
+- [X] "for" commands
+
+## Step 3
+- [X] Built-in Commands
+- [X] Commands blocks
+- [X] Functions
+- [X] Commands Substitution 
+- [X] Subshells
+
+## Step 4
+- [ ] "case" commands
+- [ ] Alisaes
+- [ ] Field Splitting
